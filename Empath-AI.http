@@ -1,0 +1,6 @@
+@Empath_AI_HostAddress = http://localhost:5280
+
+GET {{Empath_AI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
