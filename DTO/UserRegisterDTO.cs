@@ -9,6 +9,7 @@ namespace Empath_AI.DTO
         public string Last_Name { get; set; }
         [Required]
         public string Phone { get; set; }
+        public string? Image_URl {  get; set; }
         public string Email { get; set; }
         [Required]
         public string Password { get; set; }

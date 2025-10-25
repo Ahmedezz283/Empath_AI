@@ -27,6 +27,7 @@ namespace Empath_AI.Repository
                 Last_Name = user.Last_Name,
                 Email = user.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(user.Password),
+                Image_URL = user.Image_URl,
                 Phone = user.Phone,
                 Age = user.Age,
                 Emergancy_Contact = user.Emergancy_Contact,
@@ -55,9 +56,9 @@ namespace Empath_AI.Repository
             user.First_Name = usernm.First_Name;
             user.Last_Name = usernm.Last_Name;
             user.Email = usernm.Email;
-            user.Role_Id = usernm.Role_Id;
+            user.Emergancy_Contact = usernm.Emergancy_Contact;
+            user.Gender = usernm.Gender;
             //user.Password = BCrypt.Net.BCrypt.HashPassword(usernm.Password);
-            //user.Confirm_Password = BCrypt.Net.BCrypt.HashPassword(usernm.Password);
 
 
             _context.Users.Update(user);
