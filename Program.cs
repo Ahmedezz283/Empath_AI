@@ -22,11 +22,11 @@ builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configur
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddAuthentication("Cookies").AddCookie("Cookies", options =>
+/*builder.Services.AddAuthentication("Cookies").AddCookie("Cookies", options =>
 {
     options.LoginPath = "/Account/login";
     options.AccessDeniedPath = "/";
-});
+});*/
 
 var app = builder.Build();
 
