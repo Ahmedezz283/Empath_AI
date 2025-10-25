@@ -31,7 +31,7 @@ namespace Empath_AI.Repository
                 Phone = user.Phone,
                 Age = user.Age,
                 Emergancy_Contact = user.Emergancy_Contact,
-                Gender = user.Gender,
+                Gender = user.Gender?.ToLower() == "male",
             };
             await _context.Users.AddAsync(user1);
             await _context.SaveChangesAsync();
@@ -57,13 +57,21 @@ namespace Empath_AI.Repository
             user.Last_Name = usernm.Last_Name;
             user.Email = usernm.Email;
             user.Emergancy_Contact = usernm.Emergancy_Contact;
-            user.Gender = usernm.Gender;
-            //user.Password = BCrypt.Net.BCrypt.HashPassword(usernm.Password);
+            user.Gender = usernm.Gender?.ToLower() == "male";
+            user.Password = BCrypt.Net.BCrypt.HashPassword(usernm.Password);
+            user.Age =usernm.Age;
+            user.Phone = usernm.Phone;
+            user.Image_URL = usernm.Image_URl;
 
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task Delete(User user)
+        {
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

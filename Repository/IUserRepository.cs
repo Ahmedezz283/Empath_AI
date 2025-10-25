@@ -7,5 +7,9 @@ namespace Empath_AI.Repository
     {
         Task<IEnumerable<User>> GetAll();
         Task CreateUser(UserRegisterDTO user);
+        Task<User?> FindUser(int id);
+        Task<User?> FindUser(string name);
+        Task<bool> UpdateUser(UserRegisterDTO usernm, int Id);
+
     }
 }

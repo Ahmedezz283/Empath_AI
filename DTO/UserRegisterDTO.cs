@@ -14,7 +14,7 @@ namespace Empath_AI.DTO
         [Required]
         public string Password { get; set; }
         [Required]
-        public bool Gender { get; set; }
+        public string? Gender { get; set; }
         public string Emergancy_Contact { get; set; }
         public int Age { get; set; }
     }
