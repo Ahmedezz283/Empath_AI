@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Empath_AI.Model;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace Empath_AI.Data
@@ -7,6 +8,7 @@ namespace Empath_AI.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-       
+        public DbSet<User> Users { get; set; }
+
     }
 }

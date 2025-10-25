@@ -1,0 +1,17 @@
+﻿namespace Empath_AI.Model
+{
+    public class User
+    {
+        public int Id { get; set; }
+        public string First_Name { get; set; }
+        public string Last_Name { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public bool Gender { get; set; }
+        public string Emergancy_Contact { get; set; }
+        public int Age { get; set; }
+        public string Role { get; set; }
+        public DateTimeOffset Created_At { get; set; } = DateTimeOffset.UtcNow;
+    }
+}
