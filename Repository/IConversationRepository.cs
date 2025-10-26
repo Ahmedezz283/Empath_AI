@@ -9,9 +9,9 @@ namespace Empath_AI.Repository
         Task<IEnumerable<Conversation>> GetAll();
         Task<Conversation> GetConversationById(int Id);
         Task<Conversation> CreateConversation(ConversationDto conversationDto);
-        //Task<bool> UpdateTitle(int Id,string NewTitle);
-        //Task<bool> UpdateLastActivity(int Id);
-        //Task <bool>DeleteConversation(Conversation conversation);
+        Task<bool> UpdateTitle(int Id,string NewTitle);
+        Task<bool> UpdateLastActivity(int Id);
+        Task <bool>DeleteConversation(Conversation conversation);
 
 
 

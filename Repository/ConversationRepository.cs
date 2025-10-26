@@ -21,6 +21,7 @@ namespace Empath_AI.Repository
             var c = await _context.Conversations.ToListAsync();
             return c;
         }
+
         public async Task<Conversation?>GetConversationById(int Id)
         {
             return await _context.Conversations.Include(x=>x.user)
@@ -43,7 +44,44 @@ namespace Empath_AI.Repository
             return conversation;
         }
 
+        public async Task<bool>UpdateTitle(int Id, string NewTitle)
+        {
+            var conversation = await GetConversationById(Id);
+            if(conversation==null)
+            {
+                return false;
+            }
+            conversation.Title = NewTitle;
+            _context.Conversations.Update(conversation);
+            await _context.SaveChangesAsync();
+            return true;
+        }
 
+        public async Task<bool> UpdateLastActivity(int Id)
+        {
+            var con = await GetConversationById(Id);
+            if(con==null)
+            {
+                return false;
+            }
+            con.Last_Activity = DateTime.Now;
+            _context.Conversations.Update(con);
+            await _context.SaveChangesAsync();
+            return true;      
+        }
+
+          public async Task<bool>DeleteConversation( int Id)
+        {
+            var c = await GetConversationById(Id);
+            if (c==null)
+            {
+                return false;
+            }
+
+            _context.Conversations.Remove(c);
+            await _context.SaveChangesAsync();
+            return true;
+        }           
 
 
 
