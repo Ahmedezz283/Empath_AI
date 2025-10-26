@@ -16,6 +16,6 @@
         public string Role { get; set; }
         public DateTimeOffset Created_At { get; set; } = DateTimeOffset.UtcNow;
 
-       // public List<Conversation> conversations { get; set; }
+       public ICollection<Conversation> conversations { get; set; }
     }
 }

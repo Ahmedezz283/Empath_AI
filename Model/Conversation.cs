@@ -19,8 +19,8 @@ namespace Empath_AI.Model
         public int? Medical_ID { get; set; }
         [Required]
         public string Title { get; set; }
-        public DateTime Created_At { get;set;}
-        public DateTime Last_Activity { get; set; }
+        public DateTimeOffset Created_At { get; set; } = DateTime.UtcNow;
+        public DateTimeOffset Last_Activity { get; set; } = DateTime.UtcNow;
         public User user { get; set; }
 
         //public Bot bot{get;set;}
