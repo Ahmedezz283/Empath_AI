@@ -27,11 +27,11 @@ namespace Empath_AI.Repository
                 Last_Name = user.Last_Name,
                 Email = user.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(user.Password),
-                Image_URL = user.Image_URl,
                 Phone = user.Phone,
                 Age = user.Age,
                 Emergancy_Contact = user.Emergancy_Contact,
                 Gender = user.Gender?.ToLower() == "male",
+                Created_At = DateTimeOffset.UtcNow,
             };
             await _context.Users.AddAsync(user1);
             await _context.SaveChangesAsync();
@@ -61,7 +61,6 @@ namespace Empath_AI.Repository
             user.Password = BCrypt.Net.BCrypt.HashPassword(usernm.Password);
             user.Age =usernm.Age;
             user.Phone = usernm.Phone;
-            user.Image_URL = usernm.Image_URl;
 
 
             _context.Users.Update(user);

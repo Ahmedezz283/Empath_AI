@@ -3,6 +3,7 @@ using Empath_AI.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,8 @@ builder.Services.AddSwaggerGen();
     options.AccessDeniedPath = "/";
 });*/
 
+var config = builder.Configuration;
+
 builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
@@ -38,7 +41,11 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true, //مين اللى بيعمل التوكين
-
+        ValidIssuer = config["JWT:Issure"],
+        ValidateAudience = true,
+        ValidAudience = config["JWT:Audience"],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Key"])),
     };
 });
 
