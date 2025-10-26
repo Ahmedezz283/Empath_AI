@@ -1,10 +1,11 @@
 ﻿using Empath_AI.Data;
-using Empath_AI.DTO;
+using Empath_AI.DTO.Conversation;
 using Empath_AI.Model;
 using Grpc.Core;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace Empath_AI.Repository
 {
@@ -29,19 +30,19 @@ namespace Empath_AI.Repository
                                               .FirstOrDefaultAsync(x => x.Conversations_ID == Id);
         }
 
-        public async Task<Conversation> CreateConversation(ConversationDto conversationDto)
+        public async Task CreateConversation(ConversationDTO conversationDto,User user)
         {
             var conversation = new Conversation()
             {
-                 User_ID=conversationDto.User_ID,
+                 User_ID=user.Id,
                  Title=conversationDto.Title,
-                 Created_At=DateTime.Now,
-                 Last_Activity=DateTime.Now
+                 Created_At=DateTime.UtcNow,
+                 Last_Activity=DateTime.UtcNow
 
             };
             await _context.Conversations.AddAsync(conversation);
             await _context.SaveChangesAsync();
-            return conversation;
+            
         }
 
         public async Task<bool>UpdateTitle(int Id, string NewTitle)
@@ -64,23 +65,18 @@ namespace Empath_AI.Repository
             {
                 return false;
             }
-            con.Last_Activity = DateTime.Now;
+            con.Last_Activity = DateTime.UtcNow;
             _context.Conversations.Update(con);
             await _context.SaveChangesAsync();
             return true;      
         }
 
-          public async Task<bool>DeleteConversation( int Id)
+          public async Task DeleteConversation(Conversation conversation )
         {
-            var c = await GetConversationById(Id);
-            if (c==null)
-            {
-                return false;
-            }
-
-            _context.Conversations.Remove(c);
+            
+            _context.Conversations.Remove(conversation);
             await _context.SaveChangesAsync();
-            return true;
+            
         }           
 
 
