@@ -1,4 +1,4 @@
-﻿using Empath_AI.DTO;
+﻿using Empath_AI.DTO.User;
 using Empath_AI.Model;
 
 namespace Empath_AI.Repository

@@ -1,5 +1,8 @@
 ﻿using Empath_AI.Data;
+using Empath_AI.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +21,6 @@ builder.Services.AddControllers();
             );
         }));*/
 
-builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -27,6 +29,18 @@ builder.Services.AddSwaggerGen();
     options.LoginPath = "/Account/login";
     options.AccessDeniedPath = "/";
 });*/
+
+builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true, //مين اللى بيعمل التوكين
+
+    };
+});
 
 var app = builder.Build();
 

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Empath_AI.DTO
+namespace Empath_AI.DTO.User
 {
     public class UserRegisterDTO
     {
