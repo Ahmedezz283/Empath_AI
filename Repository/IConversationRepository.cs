@@ -11,7 +11,7 @@ namespace Empath_AI.Repository
         Task<Conversation> CreateConversation(ConversationDto conversationDto);
         Task<bool> UpdateTitle(int Id,string NewTitle);
         Task<bool> UpdateLastActivity(int Id);
-        Task <bool>DeleteConversation(Conversation conversation);
+        Task <bool>DeleteConversation(int Id);
 
 
 
