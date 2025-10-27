@@ -20,12 +20,14 @@ namespace Empath_AI.Controllers
         private readonly AppDbContext _context;
         private readonly IUserRepository _user;
         private readonly IConfiguration config;
+        private readonly Email _emailService;
 
-        public UserController(AppDbContext context, IUserRepository user, IConfiguration configuration)
+        public UserController(AppDbContext context, IUserRepository user, IConfiguration configuration, Email emailService)
         {
             _context = context;
             _user = user;
             config = configuration;
+            _emailService = emailService;
         }
 
         [HttpPost]
@@ -66,6 +68,43 @@ namespace Empath_AI.Controllers
 
             return tokenStr;
 
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] UserForgetPasswordDTO model)
+        {
+            var token = Guid.NewGuid().ToString(); 
+            var saved = await _user.GeneratePasswordResetTokenAsync(model.Email, token);
+
+            if (!saved)
+                return NotFound("Email not found");
+
+            var resetLink = $"https://your-frontend-app.com/reset-password?token={token}";
+            await _emailService.SendEmailAsync(model.Email, "Reset Your Password",
+                $"Click the link to reset your password: {resetLink}");
+
+            return Ok("Reset link sent to your email.");
+        }
+
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] UserResetPasswordDTO model)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.ResetToken == model.Token && u.ResetTokenExpires > DateTime.UtcNow);
+
+            if (user == null)
+                return BadRequest("Invalid or expired token.");
+
+            user.Password = model.Password;
+            user.Confirm_Password = model.Confirm_Password;
+            user.ResetToken = null;
+            user.ResetTokenExpires = null;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok("Password reset successfully.");
         }
     }
 }
