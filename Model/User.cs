@@ -13,7 +13,7 @@
         public bool? Gender { get; set; }
         public string Emergancy_Contact { get; set; }
         public int Age { get; set; }
-        public string? Role { get; set; }
+        public string Role { get; set; } = "User";
         public string? ResetToken { get; set; }
         public DateTime? ResetTokenExpires { get; set; }
         public string? RefreshToken { get; set; }

@@ -34,6 +34,7 @@ namespace Empath_AI.Repository
                 Confirm_Password = BCrypt.Net.BCrypt.HashPassword(user.Confirm_Password),
                 Phone = user.Phone,
                 Age = user.Age,
+                Role = "User",
                 Emergancy_Contact = user.Emergancy_Contact,
                 Gender = user.Gender?.ToLower() == "male",
                 Created_At = DateTimeOffset.UtcNow,
