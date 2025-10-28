@@ -20,7 +20,7 @@ namespace Empath_AI.Repository
 
         //Task<List<Message>> GetConversationMessages(int conversationId)
          Task<List<ConversationSummaryDTO>> GetConversationSummeries(int UserID);
-
+        Task<bool> ArchiveConversation(int conversationid);
 
 
 

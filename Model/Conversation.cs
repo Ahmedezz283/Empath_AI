@@ -21,6 +21,7 @@ namespace Empath_AI.Model
         public string Title { get; set; }
         public DateTimeOffset Created_At { get; set; } = DateTime.UtcNow;
         public DateTimeOffset Last_Activity { get; set; } = DateTime.UtcNow;
+        public bool Is_Archived { get; set; } = false;
         public User user { get; set; }
 
 

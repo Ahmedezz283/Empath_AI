@@ -127,10 +127,20 @@ namespace Empath_AI.Repository
                                       Last_Activity = c.Last_Activity,
                                       //lastMessage=c.messages.OrderByDescending(m=>m.Created_At).FirtsOrDefault().Content
                                   })
-                                  .ToListAsync();
+                                  .ToListAsync();                     
+        }
 
-                                  
-                                 
+        public async Task<bool> ArchiveConversation(int conversationid)
+        {
+            var con = await GetConversationById(conversationid);
+            if(con==null)
+            {
+                return false;
+            }
+            con.Is_Archived = true;
+            _context.Conversations.Update(con);
+            _context.SaveChangesAsync();
+            return true;
         }
 
 
