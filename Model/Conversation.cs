@@ -23,6 +23,7 @@ namespace Empath_AI.Model
         public DateTimeOffset Last_Activity { get; set; } = DateTime.UtcNow;
         public User user { get; set; }
 
+
         //public Bot bot{get;set;}
         //public Medical_Report medical_Report{get;set;} 
        
