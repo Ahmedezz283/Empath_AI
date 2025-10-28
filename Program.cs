@@ -1,4 +1,5 @@
 ﻿using Empath_AI.Data;
+using Empath_AI.Model;
 using Empath_AI.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ var config = builder.Configuration;
 
 builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<Email>();
 builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.SaveToken = true;

@@ -6,10 +6,10 @@ namespace Empath_AI.Repository
     public interface IUserRepository
     {
         Task<IEnumerable<User>> GetAll();
-        Task CreateUserDetails(UserRegisterDTO user);
-        Task<bool> AddUserProfile(int user_id, string URL);
+        Task<(bool Success, string Message, int? id)> CreateUserDetails(UserRegisterDTO user);
+        Task<(bool Success, string Message, string? ImageUrl)> AddUserProfile(UserProfilePictureDTO model);
         Task<User?> FindUser(int id);
-        Task<User?> FindUser(string name);
+        Task<User?> FindUser(string email);
         Task<bool> UpdateUser(UserRegisterDTO usernm, int Id);
         Task Delete(User user);
         Task<bool> GeneratePasswordResetTokenAsync(string email, string token);
