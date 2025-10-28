@@ -2,6 +2,7 @@
 using Empath_AI.DTO.User;
 using Empath_AI.Model;
 using Empath_AI.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,7 @@ namespace Empath_AI.Controllers
             _emailService = emailService;
         }
 
+        [Authorize (Roles = "Admin")]
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -77,6 +79,7 @@ namespace Empath_AI.Controllers
             {
                 new Claim(ClaimTypes.Name , exsitUser.First_Name),
                 new Claim(ClaimTypes.Email , exsitUser.Email),
+                new Claim(ClaimTypes.Role , exsitUser.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

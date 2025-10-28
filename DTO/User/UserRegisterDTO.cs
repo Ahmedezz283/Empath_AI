@@ -15,6 +15,7 @@ namespace Empath_AI.DTO.User
         public string Password { get; set; }
         [Required]
         public string Confirm_Password { get; set; }
+        public string Role { get; set; } = "User";
         public string? Gender { get; set; }
         public string Emergancy_Contact { get; set; }
         public int Age { get; set; }
