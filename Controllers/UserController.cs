@@ -23,13 +23,15 @@ namespace Empath_AI.Controllers
         private readonly IUserRepository _user;
         private readonly IConfiguration config;
         private readonly Email _emailService;
+        private readonly Token _token;
 
-        public UserController(AppDbContext context, IUserRepository user, IConfiguration configuration, Email emailService)
+        public UserController(AppDbContext context, IUserRepository user, IConfiguration configuration, Email emailService, Token token)
         {
             _context = context;
             _user = user;
             config = configuration;
             _emailService = emailService;
+            _token = token;
         }
 
         [Authorize (Roles = "Admin")]
@@ -59,8 +61,8 @@ namespace Empath_AI.Controllers
                 return Unauthorized("Invalid email or password");
             }
 
-            var accessToken = CreateToken(existUser);
-            var refreshToken = GenerateRefreshToken();
+            var accessToken = _token.CreateToken(existUser);
+            var refreshToken = _token.GenerateRefreshToken();
 
             existUser.RefreshToken = refreshToken;
             existUser.RefreshTokenExpires = DateTime.UtcNow.AddDays(7);
@@ -73,42 +75,7 @@ namespace Empath_AI.Controllers
             });
         }
 
-        private string CreateToken(User exsitUser)
-        {
-            var userClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name , exsitUser.First_Name),
-                new Claim(ClaimTypes.Email , exsitUser.Email),
-                new Claim(ClaimTypes.Role , exsitUser.Role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Key"]));
-
-            JwtSecurityToken token = new JwtSecurityToken
-                (
-                    issuer: config["JWT:Issure"],
-                    audience: config["JWT:Audience"],
-                    claims: userClaims,
-                    expires: DateTime.UtcNow.AddMinutes(15),
-                    signingCredentials:new SigningCredentials(signingKey,SecurityAlgorithms.HmacSha256 )
-                );
-
-            var tokenStr = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return tokenStr;
-
-        }
-
-        private string GenerateRefreshToken()
-        {
-            var randomBytes = new byte[64];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomBytes);
-                return Convert.ToBase64String(randomBytes);
-            }
-        }
+       
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] UserRegisterDTO model)
@@ -146,8 +113,8 @@ namespace Empath_AI.Controllers
             if (user == null || user.RefreshTokenExpires <= DateTime.UtcNow)
                 return Unauthorized("Invalid or expired refresh token");
 
-            var newAccessToken = CreateToken(user);
-            var newRefreshToken = GenerateRefreshToken();
+            var newAccessToken = _token.CreateToken(user);
+            var newRefreshToken = _token.GenerateRefreshToken();
 
             user.RefreshToken = newRefreshToken;
             user.RefreshTokenExpires = DateTime.UtcNow.AddDays(7);
