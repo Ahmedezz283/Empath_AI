@@ -25,6 +25,9 @@ namespace Empath_AI.Repository
 
             Console.WriteLine("Creating user...");
 
+            var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
+
             var user1 = new User()
             {
                 First_Name = user.First_Name,
@@ -37,7 +40,7 @@ namespace Empath_AI.Repository
                 Role = "User",
                 Emergancy_Contact = user.Emergancy_Contact,
                 Gender = user.Gender?.ToLower() == "male",
-                Created_At = DateTimeOffset.UtcNow,
+                Created_At = egyptTime,
             };
             
             await _context.Users.AddAsync(user1);
