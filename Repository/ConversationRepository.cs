@@ -32,7 +32,7 @@ namespace Empath_AI.Repository
                                               .FirstOrDefaultAsync(x => x.Conversations_ID == Id);
         }
 
-        public async Task<List<Conversation>> GetConversationBtUserId(int UserId)
+        public async Task<List<Conversation>> GetConversationByUserId(int UserId)
         {
             return await _context.Conversations
                 .Where(x => x.User_ID == UserId)

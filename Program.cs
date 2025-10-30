@@ -35,7 +35,9 @@ builder.Services.AddSwaggerGen();
 var config = builder.Configuration;
 
 builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>(); 
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+
 builder.Services.AddScoped<Email>();
 builder.Services.AddScoped<Token>();
 builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
