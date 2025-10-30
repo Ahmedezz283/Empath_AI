@@ -37,7 +37,7 @@ namespace Empath_AI.Controllers
             
         }
 
-        [HttpGet("User/{UserId}")]
+        [HttpGet("User/{UserID}")]
         public async Task<IActionResult> GetByUser(int UserID)
         {
             var conversation = await _conversationRepository.GetConversationByUserId(UserID);

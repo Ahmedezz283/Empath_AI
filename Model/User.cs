@@ -21,6 +21,6 @@
 
         public DateTimeOffset Created_At { get; set; } = DateTimeOffset.UtcNow;
 
-       public ICollection<Conversation> conversations { get; set; }
+       //public ICollection<Conversation> conversations { get; set; }
     }
 }
