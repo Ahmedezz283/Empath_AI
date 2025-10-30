@@ -32,7 +32,7 @@ namespace Empath_AI.Controllers
         {
             var con = await _conversationRepository.GetConversationById(id);
             if (con == null)
-                return (NotFound("Conversation not found"));
+                return NotFound("Conversation not found");
             return Ok(con);
             
         }
@@ -55,6 +55,16 @@ namespace Empath_AI.Controllers
 
         }
 
+        [HttpPost("Open/{conversationid}")]
+        public async Task<IActionResult> OpenConversation(int conversationid)
+        {
+            var c = await _conversationRepository.OpenConversation (conversationid);
+            if (c == null)
+                return NotFound("conversation not found");
+
+            return Ok(c);
+
+        }
 
 
 
@@ -65,30 +75,13 @@ namespace Empath_AI.Controllers
 
 
 
-   
+
+
+
+
 
         //    [HttpGet("user/{userId}")] GetByUser(int userId)
-
-
         //[HttpPost] Create
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         //post
         //   [HttpPut("{id}/title")] UpdateTitle
