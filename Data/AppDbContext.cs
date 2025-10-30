@@ -10,6 +10,8 @@ namespace Empath_AI.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
+        public DbSet<Devices> Devices { get; set; }
+        public DbSet<HeartRateRecord> Hearts { get; set; }
 
     }
 }
