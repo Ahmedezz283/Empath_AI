@@ -39,7 +39,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IHeartRateRepository, HeartRateRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
-
 builder.Services.AddScoped<Email>();
 builder.Services.AddScoped<Token>();
 builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
