@@ -40,5 +40,17 @@ namespace Empath_AI.Repository
             return (true, "Heart rate recorded successfully");
         }
 
+        public async Task<double?> GetLatestHeartRate(int userid)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userid);
+            if (user == null) return null;
+
+            var record = await _context.Hearts
+                .Where(h => h.UserId == user.Id)
+                .OrderByDescending(h => h.Timestamp)
+                .FirstOrDefaultAsync();
+
+            return  record?.HeartRateValue;
+        }
     }
 }

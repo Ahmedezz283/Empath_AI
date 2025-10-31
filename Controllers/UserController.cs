@@ -1,7 +1,7 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.DTO.User;
-using Empath_AI.Model;
 using Empath_AI.Repository;
+using Empath_AI.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;

@@ -1,6 +1,7 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.DTO.Device;
 using Empath_AI.Model;
+using Empath_AI.Service;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 

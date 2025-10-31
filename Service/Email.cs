@@ -2,7 +2,7 @@
 using System.Net.Mail;
 using System.Threading.Tasks;
 
-namespace Empath_AI.Model
+namespace Empath_AI.Service
 {
     public class Email
     {

@@ -1,10 +1,13 @@
 ﻿using Empath_AI.Data;
-using Empath_AI.Model;
+using Empath_AI.Hubs;
 using Empath_AI.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.SignalR;
+using Empath_AI.Service;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,8 +42,11 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IHeartRateRepository, HeartRateRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<Email>();
 builder.Services.AddScoped<Token>();
+builder.Services.AddScoped<Bot>();
+builder.Services.AddSignalR();
 builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.SaveToken = true;
@@ -55,13 +61,30 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5280", "http://127.0.0.1:5280", "null") // allow your frontend origins
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
+
+
 var app = builder.Build();
+
+app.UseCors("AllowLocalhost");
+
 
 // Configure the HTTP request pipeline.
 /*if (app.Environment.IsDevelopment())
 {
-*/  
-    app.UseSwagger();
+*/
+app.UseSwagger();
     app.UseSwaggerUI();
 //}
 
@@ -71,5 +94,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/Chat");
 
 app.Run();
