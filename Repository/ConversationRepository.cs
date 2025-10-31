@@ -143,6 +143,23 @@ namespace Empath_AI.Repository
             return true;
         }
 
+        public async Task<bool>OpenConversation(int conversationid)
+        {
+            var con = await GetConversationById(conversationid);
+            if (con == null)
+                return false;
+
+            con.Last_Activity = DateTime.UtcNow;
+            _context.Conversations.Update(con);
+           await _context.SaveChangesAsync();
+           return true;
+
+
+        }
+
+
+
+
 
 
 
