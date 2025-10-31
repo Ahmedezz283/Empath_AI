@@ -47,7 +47,7 @@ namespace Empath_AI.Controllers
             return Ok(conversation);
         }
 
-        [HttpPost("{UserId}")]
+        [HttpPost("create/{UserId}")]
         
         public async Task<IActionResult>Create(int UserId, [FromBody]ConversationDTO conversationDTO)
         {
@@ -59,7 +59,7 @@ namespace Empath_AI.Controllers
 
         }
 
-        [HttpPost("Open/{conversationid}")]
+        [HttpPost("OpenConversation/{conversationid}")]
         public async Task<IActionResult> OpenConversation(int conversationid)
         {
             var c = await _conversationRepository.OpenConversation (conversationid);
@@ -71,7 +71,7 @@ namespace Empath_AI.Controllers
         }
 
         //////////////////////////////////////
-        [HttpGet("messages/{conversationId}")]
+        [HttpGet("Getmessages/{conversationId}")]
         public async Task<IActionResult> GetMessages(int conversationId)
         {
             var messages = await _messageRepository.GetMessagesByConversationAsync(conversationId);
