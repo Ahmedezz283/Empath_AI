@@ -7,8 +7,8 @@ namespace Empath_AI.Model
     {
         [Key]
         public int ID { get; set; }     
-        public int User_ID { get; set; }    
-        public int Bot_ID { get; set; }     
+        public int? User_ID { get; set; }    
+        public int? Bot_ID { get; set; }     
         public int Device_ID { get; set; }  
         public int Conversation_ID { get; set; } 
 

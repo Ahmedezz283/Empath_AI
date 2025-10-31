@@ -14,9 +14,8 @@ namespace Empath_AI.Model
         [Required]
         public int User_ID { get; set; }
        // [ForeignKey("bot")]
-        public int? Bot_ID { get; set; }
-        //[ForeignKey("medical_Report")]
-        public int? Medical_ID { get; set; }
+        public int Bot_ID { get; set; }
+
         [Required]
         public string Title { get; set; }
         public DateTimeOffset Created_At { get; set; } = DateTime.UtcNow;

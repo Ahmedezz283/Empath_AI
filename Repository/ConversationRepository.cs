@@ -40,11 +40,11 @@ namespace Empath_AI.Repository
                 .ToListAsync();
         }
 
-        public async Task CreateConversation(ConversationDTO conversationDto,User user)
+        public async Task CreateConversation(ConversationDTO conversationDto)
         {
             var conversation = new Conversation()
             {
-                 User_ID=user.Id,
+                 User_ID=conversationDto.userid,
                  Title=conversationDto.Title,
                  Created_At=DateTime.UtcNow,
                  Last_Activity=DateTime.UtcNow
