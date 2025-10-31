@@ -75,7 +75,7 @@ namespace Empath_AI.Controllers
 
         }
 
-        [HttpPost("Open/{conversationid}")]
+        [HttpPost("OpenConversation/{conversationid}")]
         public async Task<IActionResult> OpenConversation(int conversationid)
         {
             var c = await _conversationRepository.OpenConversation (conversationid);

@@ -23,7 +23,7 @@ namespace Empath_AI.Model
         public bool Is_Archived { get; set; } = false;
         public User user { get; set; }
 
-
+      // public ICollection<Message> messages { get; set; }
         //public Bot bot{get;set;}
         //public Medical_Report medical_Report{get;set;} 
        
