@@ -18,7 +18,7 @@ namespace Empath_AI.Repository
         Task<IEnumerable<Conversation>> SearchConversationByTitle(int UserId, string KeyWord);
         Task<IEnumerable<Conversation>> GetRecentConversations(int UserId, int days = 7);
 
-        //Task<List<Message>> GetConversationMessages(int conversationId)
+        Task<List<Empath_AI.Model.Message>> GetConversationMessages(int conversationId);
          Task<List<ConversationSummaryDTO>> GetConversationSummeries(int UserID);
         Task<bool> ArchiveConversation(int conversationid);
         Task<bool> OpenConversation(int conversationid);

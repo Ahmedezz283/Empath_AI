@@ -5,6 +5,7 @@ using FirebaseAdmin.Messaging;
 using Google.Api;
 using Grpc.Core;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
@@ -106,14 +107,15 @@ namespace Empath_AI.Repository
                .ToListAsync();
 
         }
+                              //FirebaseAdmin.Messaging.Message
+        public async Task<List<Empath_AI.Model.Message>> GetConversationMessages(int conversationId)
+        {
+            return await _context.Messages
+                .Where(m => m.Conversation_ID == conversationId)
+                .OrderBy(m => m.Created_At)
+                .ToListAsync();
+        }
 
-        //public async Task<List<Message>> GetConversationMessages(int conversationId)
-        //{
-        //    return await _context.Messages
-        //        .Where(m => m.Conversation_ID == conversationId)
-        //        .OrderBy(m => m.Created_At)
-        //        .ToListAsync();
-        //}
 
         public async  Task<List<ConversationSummaryDTO>> GetConversationSummeries(int UserID)
         {
@@ -125,7 +127,7 @@ namespace Empath_AI.Repository
                                       Conversations_ID = c.Conversations_ID,
                                       Title = c.Title,
                                       Last_Activity = c.Last_Activity,
-                                      //lastMessage=c.messages.OrderByDescending(m=>m.Created_At).FirtsOrDefault().Content
+                                      //LastMessage = c.messages.OrderByDescending(m=>m.Created_At).FirstOrDefault().Content
                                   })
                                   .ToListAsync();                     
         }

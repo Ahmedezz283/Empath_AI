@@ -14,10 +14,13 @@ namespace Empath_AI.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConversationRepository _conversationRepository;
-        public ConversationController(AppDbContext context,IConversationRepository conversationRepository)
+        private readonly IMessageRepository _messageRepository;
+        public ConversationController(AppDbContext context,IConversationRepository conversationRepository,IMessageRepository messageRepository)
         {
             _context = context;
             _conversationRepository = conversationRepository;
+            _messageRepository = messageRepository;
+            
         }
 
          [HttpGet("get-all")] 
@@ -45,6 +48,7 @@ namespace Empath_AI.Controllers
         }
 
         [HttpPost("{UserId}")]
+        
         public async Task<IActionResult>Create(int UserId, [FromBody]ConversationDTO conversationDTO)
         {
             var user = await _context.Users.FindAsync(UserId); 
@@ -66,6 +70,31 @@ namespace Empath_AI.Controllers
 
         }
 
+        //////////////////////////////////////
+        [HttpGet("messages/{conversationId}")]
+        public async Task<IActionResult> GetMessages(int conversationId)
+        {
+            var messages = await _messageRepository.GetMessagesByConversationAsync(conversationId);
+            if (messages == null || !messages.Any())
+                return NotFound("No messages found in this conversation.");
+
+            return Ok(messages);
+        }
+
+        [HttpPost("AddMessage/{conversationId}")]
+        public async Task<IActionResult> AddMessage(int conversationId, [FromBody] Message message)
+        {
+            var conversation = await _conversationRepository.GetConversationById(conversationId);
+            if (conversation == null)
+                return NotFound("Conversation not found");
+
+            message.Conversation_ID = conversationId;
+            if (message.User_ID == 0)
+                message.User_ID = conversation.User_ID;
+
+            var savedMessage = await _messageRepository.SaveMessageAsync(message);
+            return Ok(savedMessage);
+        }
 
 
 
