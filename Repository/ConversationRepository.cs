@@ -83,30 +83,30 @@ namespace Empath_AI.Repository
         }
 
           public async Task DeleteConversation(Conversation conversation )
-        {
+          {
             
             _context.Conversations.Remove(conversation);
             await _context.SaveChangesAsync();
             
-        }    
+          }    
         
          public async Task<IEnumerable<Conversation>>SearchConversationByTitle(int UserId,string KeyWord)
-        {
+         {
             return await _context.Conversations.Where(x => x.User_ID == UserId && x.Title.Contains(KeyWord))
                                                .OrderByDescending(x => x.Last_Activity)
                                                .ToListAsync(); 
 
-        }
+         }
 
          public async Task<IEnumerable<Conversation>> GetRecentConversations(int UserId,int days=7)
-        {
+         {
             var since = DateTime.UtcNow.AddDays(-days);
             return await _context.Conversations
                .Where(x => x.User_ID == UserId && x.Last_Activity >= since)
                .OrderByDescending(x => x.Last_Activity)
                .ToListAsync();
 
-        }
+         }
                               //FirebaseAdmin.Messaging.Message
         public async Task<List<Empath_AI.Model.Message>> GetConversationMessages(int conversationId)
         {
