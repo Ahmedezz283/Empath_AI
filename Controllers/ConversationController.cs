@@ -107,38 +107,25 @@ namespace Empath_AI.Controllers
 
 
 
+        //[HttpPost("AddMessage/{conversationId}")]
+        //public async Task<IActionResult> AddMessage(int conversationId, [FromBody] Message message)
+        //{
+        //    var conversation = await _conversationRepository.GetConversationById(conversationId);
+        //    if (conversation == null)
+        //        return NotFound("Conversation not found");
+
+        //    message.Conversation_ID = conversationId;
+        //    if (message.User_ID == 0)
+        //        message.User_ID = conversation.User_ID;
+
+        //    var savedMessage = await _messageRepository.SaveMessageAsync(message);
+        //    return Ok(savedMessage);
+        //}
 
 
 
 
 
-
-
-
-
-
-        //    [HttpGet("user/{userId}")] GetByUser(int userId)
-        //[HttpPost] Create
-
-        //post
-        //   [HttpPut("{id}/title")] UpdateTitle
-
-        //post
-        //    [HttpDelete("{id}")] Delete
-
-
-        // [HttpGet("search")] Search(*/
-
-        // [HttpPost("search")] Search(*/
-
-
-        /*[HttpGet("recent")] GetRecent(*/
-
-
-        /*    [HttpGet("summaries/{userId}")] GetSummaries(int*/
-
-
-        //   [HttpPut("{id}/archive")] Archive    =>   upadte
 
 
 
