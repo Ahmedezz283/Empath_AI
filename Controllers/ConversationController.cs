@@ -34,6 +34,7 @@ namespace Empath_AI.Controllers
             _hubContext = hubContext;
         }
 
+        [Authorize(Roles ="Admin")]
         [HttpGet("get-all")] 
          public async Task<IActionResult>GetAll()
         {
@@ -56,23 +57,16 @@ namespace Empath_AI.Controllers
 
         }
 
-        [Authorize]
-        [HttpGet("User/Conversations")]
-        
-        public async Task<IActionResult> GetUserConversations()
+        [HttpGet("User's Conversations")]
+        public async Task<IActionResult> GetByUser(int UserID)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                return Unauthorized("User not found in token");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            int userId = int.Parse(userIdClaim.Value);
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized("User ID not found in token");
 
-            var conversations = await _conversationRepository.GetConversationByUserId(userId);
-
-            if (conversations == null || !conversations.Any())
-                return NotFound("No conversations found for this user");
-
-            return Ok(conversations);
+            //var conversation = await _conversationRepository.GetConversationByUserId(userIdClaim);
+            return Ok(userIdClaim);
         }
 
 
@@ -93,7 +87,7 @@ namespace Empath_AI.Controllers
 
              if (string.IsNullOrEmpty(userIdClaim))
                  return Unauthorized("User ID not found in token");*/
-            int userIdClaim = 7;
+            int userIdClaim = 13;
 
             conversationDTO.userid = userIdClaim;
             
