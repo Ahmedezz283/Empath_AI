@@ -42,11 +42,6 @@ namespace Empath_AI.Controllers
             return Ok(conversations);
         }
 
-
-
-
-
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -58,9 +53,8 @@ namespace Empath_AI.Controllers
         }
 
 
-
-        //[Authorize]
-        [HttpGet("User/Conversations")]
+        [Authorize]
+        [HttpGet("User")]
 
         public async Task<IActionResult> GetUserConversations()
         {
@@ -79,8 +73,19 @@ namespace Empath_AI.Controllers
         }
 
 
+        //[HttpPost("create")]
+        //public async Task<IActionResult> Create([FromBody] ConversationDTO conversationDTO)
+        //{
+        //    if (conversationDTO.userid <= 0)
+        //        return BadRequest("User ID must be provided");
+
+        //    await _conversationRepository.CreateConversation(conversationDTO);
+        //    return Ok("Conversation created successfully");
+        //}
+
+
         [HttpPost("create")]
-        public async Task<IActionResult>Create([FromBody]ConversationDTO conversationDTO)
+        public async Task<IActionResult> Create([FromBody] ConversationDTO conversationDTO)
         {
             /* var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -89,7 +94,7 @@ namespace Empath_AI.Controllers
             int userIdClaim = 13;
 
             conversationDTO.userid = userIdClaim;
-            
+
 
             await _conversationRepository.CreateConversation(conversationDTO);
             return Ok("conversation created succsessfully");
@@ -142,11 +147,6 @@ namespace Empath_AI.Controllers
         //    var savedMessage = await _messageRepository.SaveMessageAsync(message);
         //    return Ok(savedMessage);
         //}
-
-
-
-
-
 
 
 
