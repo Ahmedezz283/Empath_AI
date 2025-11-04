@@ -3,6 +3,7 @@ using Empath_AI.DTO.Conversation;
 using Empath_AI.DTO.User;
 using Empath_AI.Model;
 using Empath_AI.Service;
+using Empath_AI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Empath_AI.Repository
@@ -10,16 +11,19 @@ namespace Empath_AI.Repository
     public class MessageRepository : IMessageRepository
     {
         private readonly AppDbContext _context;
-        private readonly Bot _bot;
+        private readonly IGeminiService _geminiService;
 
-        public MessageRepository(AppDbContext context, Bot bot)
+        public MessageRepository(AppDbContext context, IGeminiService geminiService)
         {
             _context = context;
-            _bot = bot;
+            _geminiService = geminiService;
         }
 
         public async Task<Message> SaveUserMessageAsync(MessageDTO message , string content)
         {
+            var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
+
             var userMessage = new Message
             {
                 User_ID = message.UserId,
@@ -27,7 +31,7 @@ namespace Empath_AI.Repository
                 Content = content,
                 Message_Type = "text",
                 Conversation_ID = message.Conversation_ID,
-                Created_At = DateTime.UtcNow
+                Created_At = egyptTime
             };
 
             await _context.Messages.AddAsync(userMessage);
@@ -36,14 +40,18 @@ namespace Empath_AI.Repository
         }
         public async Task<Message> SaveBotMessageAsync(MessageDTO message, string content)
         {
+
+            var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
+
             var botMessage = new Message
             {
-                Bot_ID = message.bot_id,
+                Bot_ID = 10,
                 Sender_Type = "Bot",
                 Content = content,
                 Message_Type = "text",
                 Conversation_ID = message.Conversation_ID,
-                Created_At = DateTime.UtcNow
+                Created_At = egyptTime
             };
 
             await _context.Messages.AddAsync(botMessage);

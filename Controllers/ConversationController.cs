@@ -4,6 +4,7 @@ using Empath_AI.DTO.Device;
 using Empath_AI.Model;
 using Empath_AI.Repository;
 using Empath_AI.Service;
+using Empath_AI.Services;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,18 +21,18 @@ namespace Empath_AI.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConversationRepository _conversationRepository;
-        private readonly Bot _bot;
+        private readonly IGeminiService gemin;
         private readonly IHeartRateRepository _heart;
         private readonly IMessageRepository _messageService;
         private readonly IHubContext<Hubs.ChatHub> _hubContext;
-        public ConversationController(AppDbContext context, IConversationRepository conversationRepository, Bot bot, IHeartRateRepository heart, IMessageRepository messageService, IHubContext<Hubs.ChatHub> hubContext)
+        public ConversationController(AppDbContext context, IConversationRepository conversationRepository, IHeartRateRepository heart, IMessageRepository messageService, IHubContext<Hubs.ChatHub> hubContext, IGeminiService gemin)
         {
             _context = context;
             _conversationRepository = conversationRepository;
-            _bot = bot;
             _heart = heart;
             _messageService = messageService;
             _hubContext = hubContext;
+            this.gemin = gemin;
         }
 
         [Authorize(Roles ="Admin")]
@@ -60,7 +61,8 @@ namespace Empath_AI.Controllers
             if (string.IsNullOrEmpty(userIdClaim))
                 return Unauthorized("User ID not found in token");
 
-            //var conversation = await _conversationRepository.GetConversationByUserId(userIdClaim);
+            var conversation = await _conversationRepository.GetConversationByUserId(int.Parse(userIdClaim));
+            
             return Ok(userIdClaim);
         }
 

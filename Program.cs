@@ -1,12 +1,14 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.Hubs;
 using Empath_AI.Repository;
+using Empath_AI.Service;
+using Empath_AI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.Http.Headers;
 using System.Text;
-using Microsoft.AspNetCore.SignalR;
-using Empath_AI.Service;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +28,13 @@ builder.Services.AddControllers();
             );
         }));*/
 
+
+builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                      .AddEnvironmentVariables();
+var geminiSection = builder.Configuration.GetSection("Gemini");
+var baseUrl = geminiSection.GetValue<string>("BaseUrl");
+var apiKey = geminiSection.GetValue<string>("ApiKey");
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -43,10 +52,19 @@ builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IHeartRateRepository, HeartRateRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddHttpClient<IGeminiService, GeminiService>(client =>
+{
+    // We'll still pass API key as query param, but set Accept header
+    client.BaseAddress = new Uri(baseUrl);
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
 builder.Services.AddScoped<Email>();
 builder.Services.AddScoped<Token>();
-builder.Services.AddScoped<Bot>();
-builder.Services.AddSignalR();
+//builder.Services.AddScoped<Bot>();
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10 MB
+});
 builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.SaveToken = true;
@@ -58,6 +76,24 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
         ValidAudience = config["JWT:Audience"],
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:Key"])),
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // SignalR sends token via query string ?access_token=...
+            var accessToken = context.Request.Query["access_token"];
+
+            // Check if the request is for our ChatHub
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/hubs/chat"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -73,7 +109,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-
+builder.Services.Configure<Empath_AI.Services.GeminiOptions>(builder.Configuration.GetSection("Gemini"));
 
 var app = builder.Build();
 

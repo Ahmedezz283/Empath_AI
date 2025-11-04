@@ -1,45 +1,199 @@
-﻿using Empath_AI.DTO.Conversation;
+﻿using Empath_AI.DTO;
+using Empath_AI.DTO.Conversation;
 using Empath_AI.Model;
 using Empath_AI.Repository;
-using Empath_AI.Service;
+using Empath_AI.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace Empath_AI.Hubs
 {
+    [Authorize]
     public class ChatHub : Hub
     {
-        private readonly Bot _bot;
+        private readonly IGeminiService _gemini;
+        private readonly IMessageRepository _messageRepository;
         private readonly IHeartRateRepository _heart;
-        private readonly IMessageRepository _messageService;
+        private static readonly Dictionary<string, string> _connections = new();
+        private int _connectionsCount = 0;
 
-        public ChatHub(Bot bot, IHeartRateRepository heartRateRepository, IMessageRepository messageService)
+        public ChatHub(IGeminiService gemini, IMessageRepository messageRepository , IHeartRateRepository heartRateRepository, IMessageRepository messageService)
         {
-            _bot = bot;
+            _gemini = gemini;
+            _messageRepository = messageRepository;
             _heart = heartRateRepository;
-            _messageService = messageService;
         }
+
+        
+        public override Task OnConnectedAsync()
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId != null)
+            {
+                _connections[userId] = Context.ConnectionId;
+                _connectionsCount++;
+                Console.WriteLine($"User connected: {userId}");
+            }
+            return base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId != null)
+            {
+                _connections.Remove(userId);
+                _connectionsCount--;
+                Console.WriteLine($"User disconnected: {userId}");
+            }
+            return base.OnDisconnectedAsync(exception);
+        }
+
 
         public async Task SendMessage(MessageDTO messageDTO, string content)
         {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("⚠ User ID not found in token. Connection unauthorized.");
+                await Clients.Caller.SendAsync("ReceiveError", "Unauthorized: Invalid or missing token.");
+                return;
+            }
+
+            messageDTO.UserId = int.Parse(userId);
+
+            // 1️⃣ Save the user’s message first
+            var userMessage = await _messageRepository.SaveUserMessageAsync(messageDTO, content);
+
+            // 2️⃣ Prepare the AI system prompt
+            var systemPrompt = @"
+             You are EmpathAI — an emotional wellness companion.
+             You must always:
+             - be empathetic and supportive
+             - detect emotional tone
+             - suggest grounding / safe mental self-help strategies
+             - never give medical, legal, or harmful advice
+             - if user is in crisis → encourage contacting real professionals
+             ";
+
+            // 3️⃣ Call Gemini to generate AI reply
+            var (success, reply, error) = await _gemini.GenerateTextAsync(systemPrompt, content);
+            string final_reply;
+            string wrong;
+            if (success)
+            {
+                final_reply = reply;
+
+            }
+            else
+            {
+                wrong = $"[Gemini Error] {error}";
+                final_reply = "Please try again later";
+            }
+
+           var botMessage = await _messageRepository.SaveBotMessageAsync(messageDTO, final_reply);
+            // 4️⃣ Save bot message
+           
+            // 5️⃣ Send result to the caller or all connected clients
+            await Clients.Caller.SendAsync("ReceiveMessage", new
+            {
+                user = userMessage,
+                bot = final_reply
+            });
+
+           // await ProcessAndReply(messageDTO, content, "text");
+        }
+
+        // Optional: Analyze audio directly from SignalR
+        /* public async Task AnalyzeAudio(string base64Audio, string mimeType = "audio/webm")
+         {
+             var prompt = @"
+              You will receive an audio file.
+              1) Transcribe speech
+              2) Detect emotion
+
+              Return ONLY valid JSON. NO markdown. NO backticks.
+
+              Format:
+              {""transcript"":""..."",""emotion"":""sad|happy|neutral|angry|anxious|stressed|excited""}
+              ";
+             try
+             {
+                 var audioBytes = Convert.FromBase64String(base64Audio);
+                 var (success, jsonResult, raw, error) = await _gemini.AnalyzeAudioAsync(audioBytes, mimeType, prompt);
+
+                 if (!success)
+                 {
+                     await Clients.Caller.SendAsync("AudioAnalysisResult", new { error, raw });
+                     return;
+                 }
+
+                 await Clients.Caller.SendAsync("AudioAnalysisResult", new
+                 {
+                     transcript = jsonResult?.GetProperty("transcript").GetString(),
+                     emotion = jsonResult?.GetProperty("emotion").GetString()
+                 });
+             }
+             catch (Exception ex)
+             {
+                 await Clients.Caller.SendAsync("AudioAnalysisResult", new { error = ex.Message });
+             }
+         }*/
+        public async Task SendAudioBase64(MessageDTO messageDTO, string base64Audio, string mimeType)
+        {
+            Console.WriteLine("✅ Hub entered SendAudioBase64");
             try
             {
-                messageDTO.Content = content;
+                Console.WriteLine($"🎧 Received base64 audio, length = {base64Audio?.Length ?? 0}");
 
-                var userMessage = await _messageService.SaveUserMessageAsync(messageDTO, content);
-                await Clients.All.SendAsync("ReceiveMessage", userMessage);
+                if (string.IsNullOrEmpty(base64Audio))
+                {
+                    await Clients.Caller.SendAsync("ReceiveMessage", new { reply = "❌ Empty audio data" });
+                    return;
+                }
 
-                var botReply = await _bot.GetChatbotResponseWithHeartRate(messageDTO);
-                var botMessage = await _messageService.SaveBotMessageAsync(messageDTO, botReply);
-                await Clients.All.SendAsync("ReceiveMessage", botMessage);
+                byte[] audioBytes = Convert.FromBase64String(base64Audio);
+
+                var prompt = @"
+                 You will receive an audio file.
+                 1) Transcribe speech
+                 2) Detect emotion
+                 
+                 Return ONLY valid JSON. NO markdown. NO backticks.
+                 
+                 Format:
+                 {""transcript"":""..."",""emotion"":""sad|happy|neutral|angry|anxious|stressed|excited""}
+                 ";
+
+                var (success, jsonResult, raw, error) = await _gemini.AnalyzeAudioAsync(audioBytes, mimeType, prompt);
+
+                if (!success)
+                {
+                    await Clients.Caller.SendAsync("ReceiveMessage", new { reply = $"Audio error: {error}" });
+                    return;
+                }
+
+                var transcript = jsonResult?.GetProperty("transcript").GetString() ?? "";
+                var emotion = jsonResult?.GetProperty("emotion").GetString() ?? "neutral";
+
+                await Clients.Caller.SendAsync("ReceiveMessage", new { reply = $"🗣️ {transcript}" });
+                await Clients.Caller.SendAsync("ReceiveMessage", new { reply = $"🎭 Emotion: {emotion}" });
+
+                await _messageRepository.SaveUserMessageAsync(messageDTO, transcript);
+                await _messageRepository.SaveBotMessageAsync(messageDTO, $"Emotion detected: {emotion}");
+
+                Console.WriteLine("✅ Audio processed successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error in SendMessage: {ex}");
-                throw;
+                Console.WriteLine("🔥 ERROR inside SendAudioBase64: " + ex);
+                await Clients.Caller.SendAsync("ReceiveMessage", new { reply = "Server error: " + ex.Message });
             }
         }
-
 
     }
 }

@@ -22,10 +22,11 @@ namespace Empath_AI.Model
         public DateTimeOffset Last_Activity { get; set; } = DateTime.UtcNow;
         public bool Is_Archived { get; set; } = false;
         public User user { get; set; }
+        public bool Is_Active { get; set; } = true;
 
-      // public ICollection<Message> messages { get; set; }
+        // public ICollection<Message> messages { get; set; }
         //public Bot bot{get;set;}
         //public Medical_Report medical_Report{get;set;} 
-       
+
     }
 }

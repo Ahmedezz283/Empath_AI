@@ -16,24 +16,40 @@ namespace Empath_AI.Repository
 
         public async Task<(bool Success, string Message)> AddHeartRateAsync(string deviceToken, HeartRateDTO model)
         {
+
+            var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
+
             var device = await _context.Devices
                 .FirstOrDefaultAsync(d => d.DeviceToken == deviceToken && d.IsActive);
 
             if (device == null)
                 return (false, "Unauthorized device");
 
-            var heartRate = new HeartRateRecord
+            var existingHeartRate = await _context.Hearts
+                     .FirstOrDefaultAsync(h => h.UserId == device.UserId);
+
+            if (existingHeartRate != null)
             {
-                DeviceId = device.Id,
-                UserId = device.UserId,
-                HeartRateValue = model.HeartRateValue,
-                Timestamp = DateTime.UtcNow
-            };
+                existingHeartRate.HeartRateValue = model.HeartRateValue;
+                existingHeartRate.Timestamp = egyptTime;
+                _context.Hearts.Update(existingHeartRate);
+            }
+            else
+            {
+                var heartRate = new HeartRateRecord
+                {
+                    DeviceId = device.Id,
+                    UserId = device.UserId,
+                    HeartRateValue = model.HeartRateValue,
+                    Timestamp = egyptTime
+                };
 
-            await _context.Hearts.AddAsync(heartRate);
+                await _context.Hearts.AddAsync(heartRate);
+            }
 
-            
-            device.Last_Active = DateTime.UtcNow;
+
+            device.Last_Active = egyptTime;
             _context.Devices.Update(device);
             await _context.SaveChangesAsync();
 

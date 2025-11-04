@@ -43,11 +43,15 @@ namespace Empath_AI.Repository
 
         public async Task CreateConversation(ConversationDTO conversationDto)
         {
+
+            var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
+
             var conversation = new Conversation()
             {
                  User_ID=conversationDto.userid,
                  Title=conversationDto.Title,
-                 Created_At=DateTime.UtcNow,
+                 Created_At=egyptTime,
                  Last_Activity=DateTime.UtcNow
 
             };
@@ -82,31 +86,31 @@ namespace Empath_AI.Repository
             return true;      
         }
 
-          public async Task DeleteConversation(Conversation conversation )
-          {
+        public async Task DeleteConversation(Conversation conversation )
+        {
             
             _context.Conversations.Remove(conversation);
             await _context.SaveChangesAsync();
             
-          }    
+        }    
         
-         public async Task<IEnumerable<Conversation>>SearchConversationByTitle(int UserId,string KeyWord)
-         {
-            return await _context.Conversations.Where(x => x.User_ID == UserId && x.Title.Contains(KeyWord))
-                                               .OrderByDescending(x => x.Last_Activity)
-                                               .ToListAsync(); 
-
-         }
-
-         public async Task<IEnumerable<Conversation>> GetRecentConversations(int UserId,int days=7)
-         {
-            var since = DateTime.UtcNow.AddDays(-days);
-            return await _context.Conversations
-               .Where(x => x.User_ID == UserId && x.Last_Activity >= since)
-               .OrderByDescending(x => x.Last_Activity)
-               .ToListAsync();
-
-         }
+        public async Task<IEnumerable<Conversation>>SearchConversationByTitle(int UserId,string KeyWord)
+        {
+           return await _context.Conversations.Where(x => x.User_ID == UserId && x.Title.Contains(KeyWord))
+                                              .OrderByDescending(x => x.Last_Activity)
+                                              .ToListAsync(); 
+        
+        }
+        
+        public async Task<IEnumerable<Conversation>> GetRecentConversations(int UserId,int days=7)
+        {
+           var since = DateTime.UtcNow.AddDays(-days);
+           return await _context.Conversations
+              .Where(x => x.User_ID == UserId && x.Last_Activity >= since)
+              .OrderByDescending(x => x.Last_Activity)
+              .ToListAsync();
+        
+        }
                               //FirebaseAdmin.Messaging.Message
         public async Task<List<Empath_AI.Model.Message>> GetConversationMessages(int conversationId)
         {
@@ -159,6 +163,13 @@ namespace Empath_AI.Repository
 
         }
 
+        public async Task<Conversation?> GetActiveConversationAsync(int userId)
+        {
+            return await _context.Conversations
+                .Where(c => c.User_ID == userId && c.Is_Active)
+                .OrderByDescending(c => c.Last_Activity)
+                .FirstOrDefaultAsync();
+        }
 
 
 
