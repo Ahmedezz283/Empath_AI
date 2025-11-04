@@ -14,7 +14,7 @@ using System.Security.Claims;
 
 namespace Empath_AI.Controllers
 {
-    //[Authorize]
+   // [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ConversationController : ControllerBase
@@ -43,31 +43,52 @@ namespace Empath_AI.Controllers
             return Ok(conversations);
         }
 
-        [HttpGet ("{id}")]
-          public async Task<IActionResult>GetById(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
             var con = await _conversationRepository.GetConversationById(id);
             if (con == null)
                 return NotFound("Conversation not found");
             return Ok(con);
-            
+
         }
 
-        [HttpGet("User's Conversations")]
-        public async Task<IActionResult> GetByUser(int UserID)
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (string.IsNullOrEmpty(userIdClaim))
-                return Unauthorized("User ID not found in token");
+        [Authorize]
+        [HttpGet("User")]
+
+        public async Task<IActionResult> GetUserConversations()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized("User not found in token");
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var conversations = await _conversationRepository.GetConversationByUserId(userId);
+
+            if (conversations == null || !conversations.Any())
+                return NotFound("No conversations found for this user");
 
             var conversation = await _conversationRepository.GetConversationByUserId(int.Parse(userIdClaim));
             
             return Ok(userIdClaim);
         }
 
+
+        //[HttpPost("create")]
+        //public async Task<IActionResult> Create([FromBody] ConversationDTO conversationDTO)
+        //{
+        //    if (conversationDTO.userid <= 0)
+        //        return BadRequest("User ID must be provided");
+
+        //    await _conversationRepository.CreateConversation(conversationDTO);
+        //    return Ok("Conversation created successfully");
+        //}
+
+
         [HttpPost("create")]
-        public async Task<IActionResult>Create([FromBody]ConversationDTO conversationDTO)
+        public async Task<IActionResult> Create([FromBody] ConversationDTO conversationDTO)
         {
             /* var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -76,7 +97,7 @@ namespace Empath_AI.Controllers
             int userIdClaim = 13;
 
             conversationDTO.userid = userIdClaim;
-            
+
 
             await _conversationRepository.CreateConversation(conversationDTO);
             return Ok("conversation created succsessfully");
@@ -115,6 +136,55 @@ namespace Empath_AI.Controllers
 
 
 
+        //[HttpPost("AddMessage/{conversationId}")]
+        //public async Task<IActionResult> AddMessage(int conversationId, [FromBody] Message message)
+        //{
+        //    var conversation = await _conversationRepository.GetConversationById(conversationId);
+        //    if (conversation == null)
+        //        return NotFound("Conversation not found");
+
+        //    message.Conversation_ID = conversationId;
+        //    if (message.User_ID == 0)
+        //        message.User_ID = conversation.User_ID;
+
+        //    var savedMessage = await _messageRepository.SaveMessageAsync(message);
+        //    return Ok(savedMessage);
+        //}
+
+
+
+        //[HttpPost("create")]
+        //public async Task<IActionResult> Create([FromBody] ConversationDTO conversationDTO)
+        //{
+        //    /* var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        //     if (string.IsNullOrEmpty(userIdClaim))
+        //         return Unauthorized("User ID not found in token");*/
+        //    int userIdClaim = 7;
+
+        //    conversationDTO.userid = userIdClaim;
+
+
+        //    await _conversationRepository.CreateConversation(conversationDTO);
+        //    return Ok("conversation created succsessfully");
+
+        //}
+
+
+
+
+
+        //[HttpGet("User's Conversations")]
+        //public async Task<IActionResult> GetByUser(int UserID)
+        //{
+        //    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        //    if (string.IsNullOrEmpty(userIdClaim))
+        //        return Unauthorized("User ID not found in token");
+
+        //    //var conversation = await _conversationRepository.GetConversationByUserId(userIdClaim);
+        //    return Ok(userIdClaim);
+        //}
 
 
 
@@ -122,31 +192,6 @@ namespace Empath_AI.Controllers
 
 
 
-
-
-
-        //    [HttpGet("user/{userId}")] GetByUser(int userId)
-        //[HttpPost] Create
-
-        //post
-        //   [HttpPut("{id}/title")] UpdateTitle
-
-        //post
-        //    [HttpDelete("{id}")] Delete
-
-
-        // [HttpGet("search")] Search(*/
-
-        // [HttpPost("search")] Search(*/
-
-
-        /*[HttpGet("recent")] GetRecent(*/
-
-
-        /*    [HttpGet("summaries/{userId}")] GetSummaries(int*/
-
-
-        //   [HttpPut("{id}/archive")] Archive    =>   upadte
 
 
 
