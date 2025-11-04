@@ -52,7 +52,7 @@ namespace Empath_AI.Repository
                  User_ID=conversationDto.userid,
                  Title=conversationDto.Title,
                  Created_At=egyptTime,
-                 Last_Activity=DateTime.UtcNow
+                 Last_Activity=egyptTime
 
             };
             await _context.Conversations.AddAsync(conversation);

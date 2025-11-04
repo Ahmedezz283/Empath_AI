@@ -70,7 +70,7 @@ namespace Empath_AI.Controllers
             if (conversations == null || !conversations.Any())
                 return NotFound("No conversations found for this user");
 
-            var conversation = await _conversationRepository.GetConversationByUserId(int.Parse(userIdClaim));
+            var conversation = await _conversationRepository.GetConversationByUserId(userId);
             
             return Ok(userIdClaim);
         }
