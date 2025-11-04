@@ -93,6 +93,7 @@ namespace Empath_AI.Hubs
             {
                 wrong = $"[Gemini Error] {error}";
                 final_reply = "Please try again later";
+                await Clients.Caller.SendAsync(final_reply);
             }
 
            var botMessage = await _messageRepository.SaveBotMessageAsync(messageDTO, final_reply);
@@ -102,47 +103,10 @@ namespace Empath_AI.Hubs
             await Clients.Caller.SendAsync("ReceiveMessage", new
             {
                 user = userMessage,
-                bot = final_reply
+                bot = botMessage
             });
 
-           // await ProcessAndReply(messageDTO, content, "text");
         }
-
-        // Optional: Analyze audio directly from SignalR
-        /* public async Task AnalyzeAudio(string base64Audio, string mimeType = "audio/webm")
-         {
-             var prompt = @"
-              You will receive an audio file.
-              1) Transcribe speech
-              2) Detect emotion
-
-              Return ONLY valid JSON. NO markdown. NO backticks.
-
-              Format:
-              {""transcript"":""..."",""emotion"":""sad|happy|neutral|angry|anxious|stressed|excited""}
-              ";
-             try
-             {
-                 var audioBytes = Convert.FromBase64String(base64Audio);
-                 var (success, jsonResult, raw, error) = await _gemini.AnalyzeAudioAsync(audioBytes, mimeType, prompt);
-
-                 if (!success)
-                 {
-                     await Clients.Caller.SendAsync("AudioAnalysisResult", new { error, raw });
-                     return;
-                 }
-
-                 await Clients.Caller.SendAsync("AudioAnalysisResult", new
-                 {
-                     transcript = jsonResult?.GetProperty("transcript").GetString(),
-                     emotion = jsonResult?.GetProperty("emotion").GetString()
-                 });
-             }
-             catch (Exception ex)
-             {
-                 await Clients.Caller.SendAsync("AudioAnalysisResult", new { error = ex.Message });
-             }
-         }*/
         public async Task SendAudioBase64(MessageDTO messageDTO, string base64Audio, string mimeType)
         {
             Console.WriteLine("✅ Hub entered SendAudioBase64");
