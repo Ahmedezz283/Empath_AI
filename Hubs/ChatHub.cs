@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace Empath_AI.Hubs
 {
-    [Authorize]
+    //[Authorize]
     public class ChatHub : Hub
     {
         private readonly IGeminiService _gemini;
@@ -28,7 +28,7 @@ namespace Empath_AI.Hubs
         }
 
         
-        public override Task OnConnectedAsync()
+       /* public override Task OnConnectedAsync()
         {
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId != null)
@@ -51,11 +51,11 @@ namespace Empath_AI.Hubs
             }
             return base.OnDisconnectedAsync(exception);
         }
-
+*/
 
         public async Task SendMessage(MessageDTO messageDTO, string content)
         {
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+           /* var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -64,7 +64,7 @@ namespace Empath_AI.Hubs
                 return;
             }
 
-            messageDTO.UserId = int.Parse(userId);
+            messageDTO.UserId = int.Parse(userId);*/
 
             // 1️⃣ Save the user’s message first
             var userMessage = await _messageRepository.SaveUserMessageAsync(messageDTO, content);
