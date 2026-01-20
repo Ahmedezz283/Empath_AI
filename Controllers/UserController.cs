@@ -75,8 +75,6 @@ namespace Empath_AI.Controllers
             });
         }
 
-       
-
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] UserRegisterDTO model)
         {
@@ -175,6 +173,27 @@ namespace Empath_AI.Controllers
             if (user == null)
                 return NotFound("User not found");
             return Ok(user);
+        }
+
+        [HttpPost("social-login")]
+        public async Task<IActionResult> SocialLogin([FromBody] UserSocialLoginDTO model)
+        {
+            var user = await _user.SocialLoginAsync(model);
+
+            var accessToken = _token.CreateToken(user);
+            var refreshToken = _token.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                token = accessToken,
+                refreshToken,
+                userId = user.Id,
+                email = user.Email,
+                role = user.Role
+            });
         }
 
     }

@@ -93,7 +93,7 @@ namespace Empath_AI.Hubs
             {
                 wrong = $"[Gemini Error] {error}";
                 final_reply = "Please try again later";
-                await Clients.Caller.SendAsync(final_reply);
+                //await Clients.Caller.SendAsync(final_reply);
             }
 
            var botMessage = await _messageRepository.SaveBotMessageAsync(messageDTO, final_reply);

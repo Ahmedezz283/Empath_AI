@@ -20,16 +20,19 @@ namespace Empath_AI.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddHeartRate([FromBody] HeartRateDTO model)
+        public async Task<IActionResult> Add([FromBody] HeartRateDTO model)
         {
-            var deviceToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
-            var result = await _heart.AddHeartRateAsync(deviceToken, model);
-
-            if (!result.Success)
-                return Unauthorized(new { message = result.Message });
-
-            return Ok(new { message = result.Message });
+            try
+            {
+                Console.WriteLine($"📩 Received from Arduino: {model.HeartRateValue}");
+                var result = await _heart.AddHeartRateAsync(model);
+                return Ok(result.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error: {ex.Message}\n{ex.StackTrace}");
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

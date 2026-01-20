@@ -137,5 +137,36 @@ namespace Empath_AI.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<User> SocialLoginAsync(UserSocialLoginDTO model)
+        {
+            // 1️⃣ Check if user already exists
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == model.Email);
+
+            if (user != null)
+            {
+                // Existing user → just return
+                return user;
+            }
+
+            // 2️⃣ Create new social user
+            user = new User
+            {
+                Email = model.Email,
+                First_Name = model.FirstName,
+                Last_Name = model.LastName,
+                Provider = model.Provider,
+                Image_URL = model.ImageUrl,
+                Password = null,               // VERY IMPORTANT
+                Role = "User",
+                Created_At = DateTimeOffset.UtcNow
+            };
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            return user;
+        }
+
     }
 }

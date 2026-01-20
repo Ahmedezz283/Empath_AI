@@ -4,7 +4,7 @@ namespace Empath_AI.Repository
 {
     public interface IHeartRateRepository
     {
-        Task<(bool Success, string Message)> AddHeartRateAsync(string deviceToken, HeartRateDTO model);
+        Task<(bool Success, string Message)> AddHeartRateAsync( HeartRateDTO model);
         Task<double?> GetLatestHeartRate(int userid);
     }
 }
