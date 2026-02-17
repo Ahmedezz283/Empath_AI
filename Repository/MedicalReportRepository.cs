@@ -1,4 +1,8 @@
-﻿using Empath_AI.Migrations;
+﻿using Empath_AI.Data;
+using Empath_AI.Model;
+using Empath_AI.Migrations;
+using Microsoft.EntityFrameworkCore;
+using Empath_AI.DTO.MedicalReport;
 
 namespace Empath_AI.Repository
 {
@@ -11,10 +15,10 @@ namespace Empath_AI.Repository
             _context = context;
         }
 
-        public async Task<(bool Success, string Message)> AddMedicalReport(int userId, MedicalReport model)
+        public async Task<(bool Success, string Message)> AddMedicalReport(int userId, MedicalReportDTO model)
         {
-            var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
-            if (!userExists)
+            var userExists = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (userExists == null)
                 return (false, "User not found");
 
             var existingReport = await _context.Medical_Reports
@@ -23,14 +27,18 @@ namespace Empath_AI.Repository
             if (existingReport != null)
                 return (false, "Medical report already exists for this user");
 
+            var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+            var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
+
             var report = new Medical_Report
             {
                 UserId = userId,
                 Notes = model.Notes,
-                Blood_Pressure = model.Blood_Pressure,
-                Heart_problem = model.Heart_problem,
-                Diabetes = model.Diabetes,
-                smoking = model.smoking
+                HasBloodPressure = model.HasBloodPressure,
+                HasHeartProblem = model.HasHeartProblem,
+                HasDiabetes = model.HasDiabetes,
+                IsSmoker = model.IsSmoker,
+                CreatedAt = egyptTime,
             };
 
             await _context.Medical_Reports.AddAsync(report);
