@@ -1,5 +1,6 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.DTO.User;
+using Empath_AI.Model;
 using Empath_AI.Repository;
 using Empath_AI.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -89,7 +90,10 @@ namespace Empath_AI.Controllers
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            return Ok(new { message = result.Message, result.id });
+            var createdUser = await _user.FindUser(model.Email);
+            var accessToken = _token.CreateToken(createdUser);
+
+            return Ok(new { message = result.Message, result.id, Token = accessToken,});
         }
 
         [HttpPost("upload-profile-picture")]

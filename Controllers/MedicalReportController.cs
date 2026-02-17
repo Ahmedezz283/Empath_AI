@@ -2,8 +2,10 @@
 using Empath_AI.DTO.MedicalReport;
 using Empath_AI.Model;
 using Empath_AI.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Empath_AI.Controllers
 {
@@ -20,19 +22,19 @@ namespace Empath_AI.Controllers
             _context = context;
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPost("AddMedicalReport")]
         public async Task<IActionResult> AddMedicalReport([FromBody] MedicalReportDTO model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            /* var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-             if (userIdClaim == null)
-                 return Unauthorized("User ID not found in token");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
 
-             int userId = int.Parse(userIdClaim);*/
-            int userId = 7;
+            int userId = int.Parse(userIdClaim);
+            
 
             var result = await _medicalRepo.AddMedicalReport(userId, model);
 
