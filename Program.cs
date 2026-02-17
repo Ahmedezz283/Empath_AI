@@ -52,6 +52,7 @@ builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IHeartRateRepository, HeartRateRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IMedicalReportRepository, MedicalReportRepository>();
 builder.Services.AddHttpClient<IGeminiService, GeminiService>(client =>
 {
     // We'll still pass API key as query param, but set Accept header

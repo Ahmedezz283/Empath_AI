@@ -157,7 +157,7 @@ namespace Empath_AI.Repository
                 Last_Name = model.LastName,
                 Provider = model.Provider,
                 Image_URL = model.ImageUrl,
-                Password = null,               // VERY IMPORTANT
+                Password = null,               
                 Role = "User",
                 Created_At = DateTimeOffset.UtcNow
             };

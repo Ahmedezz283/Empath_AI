@@ -195,6 +195,5 @@ namespace Empath_AI.Controllers
                 role = user.Role
             });
         }
-
     }
 }
