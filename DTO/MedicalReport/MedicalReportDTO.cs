@@ -8,5 +8,6 @@
         public bool HasHeartProblem { get; set; }
         public bool HasDiabetes { get; set; }
         public bool IsSmoker { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

@@ -44,5 +44,19 @@ namespace Empath_AI.Controllers
             return Ok(result.Message);
         }
 
+        [HttpPost("update")]
+        public async Task<IActionResult> UpdateMedicalReport(int id, [FromBody] MedicalReportDTO model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _medicalRepo.UpdateMedicalReport(model, id);
+
+            if (!result)
+                return NotFound("Medical report not found.");
+
+            return Ok("Medical report updated successfully.");
+        }
+
     }
 }

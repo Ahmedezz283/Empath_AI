@@ -1,8 +1,9 @@
 ﻿using Empath_AI.Data;
-using Empath_AI.Model;
-using Empath_AI.Migrations;
-using Microsoft.EntityFrameworkCore;
 using Empath_AI.DTO.MedicalReport;
+using Empath_AI.DTO.User;
+using Empath_AI.Migrations;
+using Empath_AI.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace Empath_AI.Repository
 {
@@ -46,5 +47,30 @@ namespace Empath_AI.Repository
             return (true, "Medical report added successfully");
         }
 
+        public async Task<Medical_Report?> FindMedicalReport(int id)
+        {
+            return await _context.Medical_Reports.FirstOrDefaultAsync(x => x.Id == id);
+        }
+        public async Task<bool> UpdateMedicalReport(MedicalReportDTO usernm, int Id)
+        {
+            Medical_Report user = await FindMedicalReport(Id);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.Notes = usernm.Notes;
+            user.HasBloodPressure = usernm.HasBloodPressure;
+            user.HasHeartProblem = usernm.HasHeartProblem;
+            user.HasDiabetes = usernm.HasDiabetes;
+            user.IsSmoker = usernm.IsSmoker;
+            user.UpdatedAt = usernm.UpdatedAt;
+
+
+            _context.Medical_Reports.Update(user);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -107,6 +107,26 @@ namespace Empath_AI.Controllers
             return Ok(new { message = result.Message, imageUrl = result.ImageUrl });
         }
 
+        [HttpPost("edit")]
+        public async Task<IActionResult> Edit(int id, [FromBody] UserRegisterDTO instVM)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            User instructor = await _user.FindUser(id);
+
+            if (instructor == null)
+                return NotFound("User not found");
+
+            var isUpdated = await _user.UpdateUser(instVM, id);
+
+            if (!isUpdated)
+                return BadRequest("Update failed");
+
+            return Ok("User updated successfully");
+        }
+
+
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] UserTokenRequestDTO request)
         {

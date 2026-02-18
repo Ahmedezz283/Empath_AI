@@ -42,7 +42,11 @@ namespace Empath_AI.Repository
                 Gender = user.Gender?.ToLower() == "male",
                 Created_At = egyptTime,
             };
-            
+            if (user1.Password != user1.Confirm_Password)
+            {
+                return (false, "Passwords do not match", null);
+            }
+
             await _context.Users.AddAsync(user1);
             await _context.SaveChangesAsync();
             return (true, "User created successfully", user1.Id);
@@ -75,20 +79,7 @@ namespace Empath_AI.Repository
             return (true, "Profile picture uploaded successfully", user.Image_URL);
         
         }
-        /* public async Task<bool> AddMedicalReportAsync(int userId, string reportPath, string description)
-     {
-         var report = new MedicalReport
-         {
-             UserId = userId,
-             ReportFile = reportPath,
-             Description = description,
-             CreatedAt = DateTime.UtcNow
-         };
-
-         _context.MedicalReports.Add(report);
-         await _context.SaveChangesAsync();
-         return true;
-     }*/
+        
         public async Task<User?> FindUser(int id)
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
