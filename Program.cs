@@ -59,6 +59,7 @@ builder.Services.AddHttpClient<IGeminiService, GeminiService>(client =>
     client.BaseAddress = new Uri(baseUrl);
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
+builder.Services.AddHttpClient<SocialAuthService>();
 builder.Services.AddScoped<Email>();
 builder.Services.AddScoped<Token>();
 //builder.Services.AddScoped<Bot>();

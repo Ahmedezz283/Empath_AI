@@ -1,6 +1,7 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.DTO.User;
 using Empath_AI.Model;
+using Empath_AI.Service;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -9,10 +10,14 @@ namespace Empath_AI.Repository
     public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
+        private readonly Token _token;
+        private readonly SocialAuthService _socialAuthService;
 
-        public UserRepository(AppDbContext context)
+        public UserRepository(AppDbContext context, Token token, SocialAuthService socialAuthService)
         {
             _context = context;
+            _token = token;
+            _socialAuthService = socialAuthService;
         }
 
         public async Task<IEnumerable<User>> GetAll()
@@ -128,35 +133,75 @@ namespace Empath_AI.Repository
             await _context.SaveChangesAsync();
             return true;
         }
-        public async Task<User> SocialLoginAsync(UserSocialLoginDTO model)
-        {
-            // 1️⃣ Check if user already exists
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == model.Email);
+        /*        public async Task<(User user, string refreshToken)> SocialLoginAsync(UserSocialLoginDTO model)
+                {
+                    var user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Email == model.Email);
 
-            if (user != null)
+                    if (user == null)
+                    {
+                        user = new User
+                        {
+                            Email = model.Email,
+                            First_Name = model.FirstName,
+                            Last_Name = model.LastName,
+                            Provider = model.Provider,
+                            Image_URL = model.ImageUrl,
+                            Emergancy_Contact = model.Emergancy_Contact,
+                            Phone = model.Phone,
+                            Gender = model.Gender.HasValue ? model.Gender.Value : (bool?)null,//test
+                            Password = null,
+                            Role = "User",
+                            Created_At = DateTimeOffset.UtcNow
+                        };
+                        await _context.Users.AddAsync(user);
+                        await _context.SaveChangesAsync();
+                    }
+
+
+                    var refreshToken = _token.GenerateRefreshToken();
+                    user.RefreshToken = refreshToken;
+                    await _context.SaveChangesAsync();
+
+                    return (user, refreshToken);
+                }
+        */
+
+        public async Task<(User user, string refreshToken)> SocialLoginAsync(UserSocialLoginDTO model)
+        {
+            // 1️⃣ Validate token and get full user info
+            var validatedUser = await _socialAuthService.ValidateSocialTokenAsync(model.Provider, model.Token);
+
+            // 2️⃣ Check if user exists
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == validatedUser.Email);
+
+            if (user == null)
             {
-                // Existing user → just return
-                return user;
+                // 3️⃣ Create new user with safe defaults for non-nullable fields
+                user = new User
+                {
+                    Email = validatedUser.Email,
+                    First_Name = validatedUser.FirstName,
+                    Last_Name = validatedUser.LastName,
+                    Provider = validatedUser.Provider,
+                    Image_URL = validatedUser.ImageUrl,
+                    Password = null,
+                    Role = "User",
+                    Created_At = DateTimeOffset.UtcNow,
+                    Phone = "",                 // safe default for non-nullable
+                    Emergancy_Contact = ""      // safe default
+                };
+
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
             }
 
-            // 2️⃣ Create new social user
-            user = new User
-            {
-                Email = model.Email,
-                First_Name = model.FirstName,
-                Last_Name = model.LastName,
-                Provider = model.Provider,
-                Image_URL = model.ImageUrl,
-                Password = null,               
-                Role = "User",
-                Created_At = DateTimeOffset.UtcNow
-            };
-
-            await _context.Users.AddAsync(user);
+            // 4️⃣ Generate refresh token and save
+            var refreshToken = _token.GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
             await _context.SaveChangesAsync();
 
-            return user;
+            return (user, refreshToken);
         }
 
     }

@@ -202,22 +202,28 @@ namespace Empath_AI.Controllers
         [HttpPost("social-login")]
         public async Task<IActionResult> SocialLogin([FromBody] UserSocialLoginDTO model)
         {
-            var user = await _user.SocialLoginAsync(model);
-
-            var accessToken = _token.CreateToken(user);
-            var refreshToken = _token.GenerateRefreshToken();
-
-            user.RefreshToken = refreshToken;
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+            try
             {
-                token = accessToken,
-                refreshToken,
-                userId = user.Id,
-                email = user.Email,
-                role = user.Role
-            });
+                var (user, refreshToken) = await _user.SocialLoginAsync(model);
+                var accessToken = _token.CreateToken(user);
+
+                var response = new SocialLoginResponseDTO
+                {
+                    Token = accessToken,
+                    RefreshToken = refreshToken,
+                    UserId = user.Id,
+                    Email = user.Email,
+                    Role = user.Role
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
+
     }
 }

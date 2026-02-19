@@ -13,6 +13,6 @@ namespace Empath_AI.Repository
         Task<bool> UpdateUser(UserRegisterDTO usernm, int Id);
         Task Delete(User user);
         Task<bool> GeneratePasswordResetTokenAsync(string email, string token);
-        Task<User> SocialLoginAsync(UserSocialLoginDTO model);
+        Task<(User user, string refreshToken)> SocialLoginAsync(UserSocialLoginDTO model);
     }
 }

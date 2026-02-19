@@ -1,4 +1,6 @@
-﻿namespace Empath_AI.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Empath_AI.Model
 {
     public class User
     {
@@ -7,6 +9,7 @@
         public string Last_Name { get; set; }
         public string? Image_URL { get; set; }
         public string Phone { get; set; }
+        [EmailAddress]
         public string Email { get; set; }
         public string? Password { get; set; }
         public string? Confirm_Password { get; set; }
