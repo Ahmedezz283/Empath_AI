@@ -47,10 +47,10 @@ namespace Empath_AI.Repository
                 Gender = user.Gender?.ToLower() == "male",
                 Created_At = egyptTime,
             };
-            if (user1.Password != user1.Confirm_Password)
+           /* if (user1.Password != user1.Confirm_Password)
             {
                 return (false, "Passwords do not match", null);
-            }
+            }*/
 
             await _context.Users.AddAsync(user1);
             await _context.SaveChangesAsync();

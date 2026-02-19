@@ -19,7 +19,7 @@ namespace Empath_AI.Repository
             _geminiService = geminiService;
         }
 
-        public async Task<Message> SaveUserMessageAsync(MessageDTO message , string content)
+        public async Task<Message> SaveUserMessageAsync(MessageDTO message , string content )
         {
             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
