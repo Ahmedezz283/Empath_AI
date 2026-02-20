@@ -1,6 +1,7 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.DTO.Conversation;
 using Empath_AI.DTO.Device;
+using Empath_AI.Migrations;
 using Empath_AI.Model;
 using Empath_AI.Repository;
 using Empath_AI.Service;
@@ -104,16 +105,94 @@ namespace Empath_AI.Controllers
 
         }
 
+
+
+        //[HttpDelete("delete")]
+        //public async Task<IActionResult> Delete()
+        //{
+        //    var userId = int.Parse(User.FindFirst("UserId").Value);
+
+        //    var conv = await _conversationRepository.GetConversationByUserId(userId);
+
+        //    if (conv == null)
+        //        return NotFound("Conversation not found");
+
+        //    await _conversationRepository.DeleteConversation();
+        //    return Ok("Conversation deleted");
+        //}
+
+
+
+        //[HttpDelete("id")] 
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    var conv = await _conversationRepository.GetConversationById(id); 
+        //    if (conv == null) 
+        //        return NotFound("Conversation not found");
+
+        //    await _conversationRepository.DeleteConversation(conv); 
+
+        //    return Ok("Conversation deleted"); 
+        //}
+
+
+
         [HttpPost("OpenConversation/{conversationid}")]
         public async Task<IActionResult> OpenConversation(int conversationid)
         {
-            var c = await _conversationRepository.OpenConversation (conversationid);
+            var c = await _conversationRepository.OpenConversation(conversationid);
             if (c == null)
                 return NotFound("conversation not found");
 
             return Ok(c);
 
         }
+
+
+        //        [HttpGet("ConversationHistory/{userId}")]
+        //public async Task<IActionResult> ConversationHistory(int userId)
+        //{
+        //    var result = await _conversationRepository.ConversationHistory(userId);
+        //    return Ok(result);
+        //}                                                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //[HttpPost("OpenConversation/{conversationid}")]
+        //public async Task<IActionResult> OpenConversation(int conversationid)
+        //{
+        //    var c = await _conversationRepository.OpenConversation (conversationid);
+        //    if (c == null)
+        //        return NotFound("conversation not found");
+
+        //    return Ok(c);
+
+        //}
 
 
         /*[HttpPost("Send-message")]

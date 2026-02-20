@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Empath_AI.Model
 {
@@ -9,7 +10,9 @@ namespace Empath_AI.Model
         public int ID { get; set; }     
         public int? User_ID { get; set; }    
         public int? Bot_ID { get; set; }     
-        public int Device_ID { get; set; }  
+        public int Device_ID { get; set; }
+
+        //[ForeignKey("Conversations_ID")]
         public int Conversation_ID { get; set; } 
 
         public string Content { get; set; }
@@ -17,6 +20,11 @@ namespace Empath_AI.Model
         public string Message_Type { get; set; } 
         public DateTimeOffset Created_At { get; set; } = DateTimeOffset.UtcNow;
 
-        //public Conversation conversation{get;set;}
+        
+
+
+        // public Conversation conversation{get;set;}
+
+
     }
 }

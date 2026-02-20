@@ -4,6 +4,7 @@ using Empath_AI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Empath_AI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260219231028_relation")]
+    partial class relation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,7 +59,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("User_ID");
 
-                    b.ToTable("Conversations", (string)null);
+                    b.ToTable("Conversations");
                 });
 
             modelBuilder.Entity("Empath_AI.Model.Devices", b =>
@@ -94,7 +97,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Devices", (string)null);
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("Empath_AI.Model.HeartRateRecord", b =>
@@ -121,7 +124,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("Hearts", (string)null);
+                    b.ToTable("Hearts");
                 });
 
             modelBuilder.Entity("Empath_AI.Model.Message", b =>
@@ -166,7 +169,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("Conversations_ID");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Empath_AI.Model.User", b =>
@@ -237,7 +240,7 @@ namespace Empath_AI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Medical_Report", b =>
@@ -276,7 +279,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Medical_Reports", (string)null);
+                    b.ToTable("Medical_Reports");
                 });
 
             modelBuilder.Entity("Empath_AI.Model.Conversation", b =>

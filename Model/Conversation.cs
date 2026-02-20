@@ -24,7 +24,8 @@ namespace Empath_AI.Model
         public User user { get; set; }
         public bool Is_Active { get; set; } = true;
 
-        // public ICollection<Message> messages { get; set; }
+        public ICollection<Message> messages { get; set; }
+
         //public Bot bot{get;set;}
         //public Medical_Report medical_Report{get;set;} 
 
