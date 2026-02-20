@@ -30,6 +30,11 @@ namespace Empath_AI.Repository
 
             Console.WriteLine("Creating user...");
 
+            if (user.Password != user.Confirm_Password)
+            {
+                return (false, "Passwords do not match", null);
+            }
+
             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
 
@@ -47,10 +52,6 @@ namespace Empath_AI.Repository
                 Gender = user.Gender?.ToLower() == "male",
                 Created_At = egyptTime,
             };
-           /* if (user1.Password != user1.Confirm_Password)
-            {
-                return (false, "Passwords do not match", null);
-            }*/
 
             await _context.Users.AddAsync(user1);
             await _context.SaveChangesAsync();
