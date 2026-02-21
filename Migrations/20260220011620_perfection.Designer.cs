@@ -4,6 +4,7 @@ using Empath_AI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Empath_AI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260220011620_perfection")]
+    partial class perfection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,9 +38,6 @@ namespace Empath_AI.Migrations
 
                     b.Property<DateTimeOffset>("Created_At")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("First_Message")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Is_Active")
                         .HasColumnType("bit");
@@ -145,9 +145,6 @@ namespace Empath_AI.Migrations
                     b.Property<int>("Conversation_ID")
                         .HasColumnType("int");
 
-                    b.Property<int>("Conversations_ID")
-                        .HasColumnType("int");
-
                     b.Property<DateTimeOffset>("Created_At")
                         .HasColumnType("datetimeoffset");
 
@@ -166,8 +163,6 @@ namespace Empath_AI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("Conversations_ID");
 
                     b.ToTable("Messages");
                 });
@@ -314,17 +309,6 @@ namespace Empath_AI.Migrations
                     b.Navigation("Device");
                 });
 
-            modelBuilder.Entity("Empath_AI.Model.Message", b =>
-                {
-                    b.HasOne("Empath_AI.Model.Conversation", "conversation")
-                        .WithMany("messages")
-                        .HasForeignKey("Conversations_ID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("conversation");
-                });
-
             modelBuilder.Entity("Medical_Report", b =>
                 {
                     b.HasOne("Empath_AI.Model.User", "User")
@@ -334,11 +318,6 @@ namespace Empath_AI.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Empath_AI.Model.Conversation", b =>
-                {
-                    b.Navigation("messages");
                 });
 #pragma warning restore 612, 618
         }

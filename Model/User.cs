@@ -6,6 +6,8 @@
         public string First_Name { get; set; }
         public string Last_Name { get; set; }
         public string? Image_URL { get; set; }
+        [MinLength(11)]
+        [MaxLength(11)]
         public string Phone { get; set; }
         public string Email { get; set; }
         public string? Password { get; set; }

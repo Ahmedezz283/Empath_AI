@@ -166,27 +166,6 @@ namespace Empath_AI.Controllers
             return Ok(result);
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [HttpGet("Get_messages")]
         public async Task<IActionResult> GetMessages(int conversationId)
         {
