@@ -187,6 +187,39 @@ namespace Empath_AI.Controllers
 
 
 
+        [HttpGet("Get_messages")]
+        public async Task<IActionResult> GetMessages(int conversationId)
+        {
+            var messages = await _conversationRepository.GetConversationMessages(conversationId);
+            return Ok(messages);
+        }
+
+
+        [HttpPut("archive/{id}")]
+        public async Task<IActionResult> Archive(int id)
+        {
+            var ok = await _conversationRepository.ArchiveConversation(id);
+            if (!ok)
+                return NotFound("Conversation not found");
+
+            return Ok("Conversation archived");
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(int userId, string keyword)
+        {
+            var result = await _conversationRepository.SearchConversationByTitle(userId, keyword);
+            return Ok(result);
+        }
+
+
+
+
+
+
+
+
+
 
 
 
