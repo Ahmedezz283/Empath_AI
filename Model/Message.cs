@@ -19,11 +19,7 @@ namespace Empath_AI.Model
         public string Sender_Type { get; set; } 
         public string Message_Type { get; set; } 
         public DateTimeOffset Created_At { get; set; } = DateTimeOffset.UtcNow;
-
-        
-
-
-        // public Conversation conversation{get;set;}
+        public Conversation conversation{get;set;}
 
 
     }

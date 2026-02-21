@@ -128,8 +128,10 @@ namespace Empath_AI.Repository
                     .Select(m => new MessageDTO
                     {
                         Sender_Type = m.Sender_Type,
-                        Text = m.Content,
-                        Time = m.Created_At.UtcDateTime
+                        Content = m.Content,
+                        Time = m.Created_At.UtcDateTime,
+                        Conversation_ID = m.Conversation_ID,
+                        UserId = (int)m.User_ID,
                     }).ToList()
             };
         }
@@ -175,19 +177,6 @@ namespace Empath_AI.Repository
             await _context.SaveChangesAsync();
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         public async Task<bool>UpdateTitle(int Id, string NewTitle)
         {
@@ -273,17 +262,6 @@ namespace Empath_AI.Repository
         }
         
 
-
-
-
-
-
-
-
-
-        
-
-
         //------------------------------------------------------------------------------------------------------------
 
         //public async Task<IEnumerable<ConversationContentDTO>> GetConversationHistoryWithMessages(int userId)
@@ -319,11 +297,6 @@ namespace Empath_AI.Repository
         //    return result;
         //}
 
-
-
-
-
-
         public async Task<Conversation?> GetActiveConversationAsync(int userId)
         {
             return await _context.Conversations
@@ -331,11 +304,6 @@ namespace Empath_AI.Repository
                 .OrderByDescending(c => c.Last_Activity)
                 .FirstOrDefaultAsync();
         }
-
-
-
-
-
 
 
     }
