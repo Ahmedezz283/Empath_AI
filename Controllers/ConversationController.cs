@@ -106,7 +106,6 @@ namespace Empath_AI.Controllers
         }
 
 
-
         //[HttpDelete("delete")]
         //public async Task<IActionResult> Delete()
         //{
@@ -122,18 +121,17 @@ namespace Empath_AI.Controllers
         //}
 
 
+        [HttpDelete("id")] 
+        public async Task<IActionResult> Delete(int id)
+        {
+            var conv = await _conversationRepository.GetConversationById(id); 
+            if (conv == null) 
+                return NotFound("Conversation not found");
 
-        //[HttpDelete("id")] 
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    var conv = await _conversationRepository.GetConversationById(id); 
-        //    if (conv == null) 
-        //        return NotFound("Conversation not found");
+            await _conversationRepository.DeleteConversation(conv); 
 
-        //    await _conversationRepository.DeleteConversation(conv); 
-
-        //    return Ok("Conversation deleted"); 
-        //}
+            return Ok("Conversation deleted"); 
+        }
 
 
 
@@ -149,12 +147,24 @@ namespace Empath_AI.Controllers
         }
 
 
-        //        [HttpGet("ConversationHistory/{userId}")]
-        //public async Task<IActionResult> ConversationHistory(int userId)
-        //{
-        //    var result = await _conversationRepository.ConversationHistory(userId);
-        //    return Ok(result);
-        //}                                                         
+        [HttpGet("ConversationHistory/{userId}")]
+        public async Task<IActionResult> ConversationHistory(int userId)
+        {
+            var result = await _conversationRepository.ConversationHistory(userId);
+            return Ok(result);
+        }
+
+
+        [HttpGet("ConversationHistoryWithMessages/{userId}")]
+        public async Task<IActionResult> GetConversationHistory(int userId)
+        {
+            var result = await _conversationRepository.GetConversationHistoryWithMessages(userId);
+
+            if (result == null || !result.Any())
+                return NotFound(new { message = "No conversations found for this user." });
+
+            return Ok(result);
+        }
 
 
 
@@ -183,16 +193,6 @@ namespace Empath_AI.Controllers
 
 
 
-        //[HttpPost("OpenConversation/{conversationid}")]
-        //public async Task<IActionResult> OpenConversation(int conversationid)
-        //{
-        //    var c = await _conversationRepository.OpenConversation (conversationid);
-        //    if (c == null)
-        //        return NotFound("conversation not found");
-
-        //    return Ok(c);
-
-        //}
 
 
         /*[HttpPost("Send-message")]
