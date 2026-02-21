@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Empath_AI.Model
+﻿namespace Empath_AI.Model
 {
     public class User
     {
@@ -9,7 +7,6 @@ namespace Empath_AI.Model
         public string Last_Name { get; set; }
         public string? Image_URL { get; set; }
         public string Phone { get; set; }
-        [EmailAddress]
         public string Email { get; set; }
         public string? Password { get; set; }
         public string? Confirm_Password { get; set; }
@@ -25,6 +22,11 @@ namespace Empath_AI.Model
 
         public DateTimeOffset Created_At { get; set; } = DateTimeOffset.UtcNow;
 
-       //public ICollection<Conversation> conversations { get; set; }
+        internal void Deconstruct(out object user, out object refreshToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        //public ICollection<Conversation> conversations { get; set; }
     }
 }

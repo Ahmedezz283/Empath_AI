@@ -23,7 +23,7 @@ namespace Empath_AI.Model
         
 
 
-        // public Conversation conversation{get;set;}
+         public Conversation conversation{get;set;}
 
 
     }

@@ -199,30 +199,30 @@ namespace Empath_AI.Controllers
             return Ok(user);
         }
 
-        [HttpPost("social-login")]
-        public async Task<IActionResult> SocialLogin([FromBody] UserSocialLoginDTO model)
-        {
-            try
-            {
-                var (user, refreshToken) = await _user.SocialLoginAsync(model);
-                var accessToken = _token.CreateToken(user);
+        //[HttpPost("social-login")]
+        //public async Task<IActionResult> SocialLogin([FromBody] UserSocialLoginDTO model)
+        //{
+        //    try
+        //    {
+        //        var (user, refreshToken) = await _user.SocialLoginAsync(model);
+        //        var accessToken = _token.CreateToken(user);
 
-                var response = new SocialLoginResponseDTO
-                {
-                    Token = accessToken,
-                    RefreshToken = refreshToken,
-                    UserId = user.Id,
-                    Email = user.Email,
-                    Role = user.Role
-                };
+        //        var response = new SocialLoginResponseDTO
+        //        {
+        //            Token = accessToken,
+        //            RefreshToken = refreshToken,
+        //            UserId = user.Id,
+        //            Email = user.Email,
+        //            Role = user.Role
+        //        };
 
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        //        return Ok(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
 
 
     }

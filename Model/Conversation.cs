@@ -26,6 +26,7 @@ namespace Empath_AI.Model
 
         public ICollection<Message> messages { get; set; }
         public string? FirstMessage { get; set; }
+        
 
         //public Bot bot{get;set;}
         //public Medical_Report medical_Report{get;set;} 
