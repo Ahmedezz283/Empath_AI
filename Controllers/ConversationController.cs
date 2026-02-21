@@ -212,10 +212,23 @@ namespace Empath_AI.Controllers
             return Ok(result);
         }
 
+        [HttpPut("update-title/{id}")]
+        public async Task<IActionResult> UpdateTitle(int id, [FromQuery] string newTitle)
+        {
+            var updated = await _conversationRepository.UpdateTitle(id, newTitle);
+            if (!updated)
+                return NotFound("Conversation not found");
+
+            return Ok("Title updated");
+        }
 
 
-
-
+        [HttpGet("RecentConversations/{userId}")]  // بنجيب لسته باخر واحدث محادثات خلال اخر سبع ايام
+        public async Task<IActionResult> RecentConversations(int userId, [FromQuery] int days = 7)
+        {
+            var result = await _conversationRepository.GetRecentConversations(userId, days);
+            return Ok(result);
+        }
 
 
 
