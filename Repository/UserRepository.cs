@@ -96,23 +96,57 @@ namespace Empath_AI.Repository
         }
         public async Task<bool> UpdateUser(UserRegisterDTO usernm, int Id)
         {
-            User user = await FindUser(Id);
+            var user = await FindUser(Id);
 
             if (user == null)
-            {
                 return false;
+
+            bool hasChanges = false;
+
+            // Generic helper for strings: ignore null, empty, or placeholder "string"
+            string SetIfChangedString(string? newValue, string currentValue)
+            {
+                if (!string.IsNullOrWhiteSpace(newValue) && newValue.ToLower() != "string" && newValue != currentValue)
+                {
+                    hasChanges = true;
+                    return newValue;
+                }
+                return currentValue;
             }
 
-            user.First_Name = usernm.First_Name;
-            user.Last_Name = usernm.Last_Name;
-            user.Email = usernm.Email;
-            user.Emergancy_Contact = usernm.Emergancy_Contact;
-            user.Gender = usernm.Gender?.ToLower() == "male";
-            user.Age =usernm.Age;
-            user.Phone = usernm.Phone;
+            // Generic helper for nullable ints: ignore 0 (or any other placeholder)
+            int SetIfChangedInt(int? newValue, int currentValue)
+            {
+                if (newValue.HasValue && newValue.Value != 0 && newValue.Value != currentValue)
+                {
+                    hasChanges = true;
+                    return newValue.Value;
+                }
+                return currentValue;
+            }
 
+            // Apply only meaningful changes
+            user.First_Name = SetIfChangedString(usernm.First_Name, user.First_Name);
+            user.Last_Name = SetIfChangedString(usernm.Last_Name, user.Last_Name);
+            user.Email = SetIfChangedString(usernm.Email, user.Email);
+            user.Emergancy_Contact = SetIfChangedString(usernm.Emergancy_Contact, user.Emergancy_Contact);
+            user.Phone = SetIfChangedString(usernm.Phone, user.Phone);
+            user.Age = SetIfChangedInt(usernm.Age, user.Age);
 
-            _context.Users.Update(user);
+            if (!string.IsNullOrWhiteSpace(usernm.Gender) && usernm.Gender.ToLower() != "string")
+            {
+                var newGender = usernm.Gender.ToLower() == "male";
+                if (newGender != user.Gender)
+                {
+                    user.Gender = newGender;
+                    hasChanges = true;
+                }
+            }
+
+            // 🔥 Only save if something actually changed
+            if (!hasChanges)
+                return true;
+
             await _context.SaveChangesAsync();
             return true;
         }
