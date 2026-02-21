@@ -1,6 +1,7 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.DTO.Conversation;
 using Empath_AI.DTO.Device;
+using Empath_AI.Migrations;
 using Empath_AI.Model;
 using Empath_AI.Repository;
 using Empath_AI.Service;
@@ -104,16 +105,140 @@ namespace Empath_AI.Controllers
 
         }
 
+
+        //[HttpDelete("delete")]
+        //public async Task<IActionResult> Delete()
+        //{
+        //    var userId = int.Parse(User.FindFirst("UserId").Value);
+
+        //    var conv = await _conversationRepository.GetConversationByUserId(userId);
+
+        //    if (conv == null)
+        //        return NotFound("Conversation not found");
+
+        //    await _conversationRepository.DeleteConversation();
+        //    return Ok("Conversation deleted");
+        //}
+
+
+        [HttpDelete("id")] 
+        public async Task<IActionResult> Delete(int id)
+        {
+            var conv = await _conversationRepository.GetConversationById(id); 
+            if (conv == null) 
+                return NotFound("Conversation not found");
+
+            await _conversationRepository.DeleteConversation(conv); 
+
+            return Ok("Conversation deleted"); 
+        }
+
+
+
         [HttpPost("OpenConversation/{conversationid}")]
         public async Task<IActionResult> OpenConversation(int conversationid)
         {
-            var c = await _conversationRepository.OpenConversation (conversationid);
+            var c = await _conversationRepository.OpenConversation(conversationid);
             if (c == null)
                 return NotFound("conversation not found");
 
             return Ok(c);
 
         }
+
+
+        [HttpGet("ConversationHistory/{userId}")]
+        public async Task<IActionResult> ConversationHistory(int userId)
+        {
+            var result = await _conversationRepository.ConversationHistory(userId);
+            return Ok(result);
+        }
+
+
+        [HttpGet("ConversationHistoryWithMessages/{userId}")]
+        public async Task<IActionResult> GetConversationHistory(int userId)
+        {
+            var result = await _conversationRepository.GetConversationHistoryWithMessages(userId);
+
+            if (result == null || !result.Any())
+                return NotFound(new { message = "No conversations found for this user." });
+
+            return Ok(result);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpGet("Get_messages")]
+        public async Task<IActionResult> GetMessages(int conversationId)
+        {
+            var messages = await _conversationRepository.GetConversationMessages(conversationId);
+            return Ok(messages);
+        }
+
+
+        [HttpPut("archive/{id}")]
+        public async Task<IActionResult> Archive(int id)
+        {
+            var ok = await _conversationRepository.ArchiveConversation(id);
+            if (!ok)
+                return NotFound("Conversation not found");
+
+            return Ok("Conversation archived");
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(int userId, string keyword)
+        {
+            var result = await _conversationRepository.SearchConversationByTitle(userId, keyword);
+            return Ok(result);
+        }
+
+        [HttpPut("update-title/{id}")]
+        public async Task<IActionResult> UpdateTitle(int id, [FromQuery] string newTitle)
+        {
+            var updated = await _conversationRepository.UpdateTitle(id, newTitle);
+            if (!updated)
+                return NotFound("Conversation not found");
+
+            return Ok("Title updated");
+        }
+
+
+        [HttpGet("RecentConversations/{userId}")]  // بنجيب لسته باخر واحدث محادثات خلال اخر سبع ايام
+        public async Task<IActionResult> RecentConversations(int userId, [FromQuery] int days = 7)
+        {
+            var result = await _conversationRepository.GetRecentConversations(userId, days);
+            return Ok(result);
+        }
+
+
+
+
+
+
+
+
+
+
 
 
         /*[HttpPost("Send-message")]

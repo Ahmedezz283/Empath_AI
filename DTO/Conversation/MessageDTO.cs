@@ -8,5 +8,10 @@
         public string username { get; set; }
         public int Conversation_ID { get; set; }
         public int? bot_id { get; set; }
+
+        public string Text { get; set; }
+        public DateTime Time { get; set; }
+
+       // public DateTimeOffset Last_Activity { get; set; } = DateTime.UtcNow;
     }
 }

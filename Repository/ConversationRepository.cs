@@ -1,5 +1,6 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.DTO.Conversation;
+using Empath_AI.Migrations;
 using Empath_AI.Model;
 using FirebaseAdmin.Messaging;
 using Google.Api;
@@ -43,22 +44,150 @@ namespace Empath_AI.Repository
 
         public async Task CreateConversation(ConversationDTO conversationDto)
         {
-
             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
 
+            // توليد العنوان
+            string title = string.IsNullOrWhiteSpace(conversationDto.Title)
+               ? GenerateTitle(conversationDto.FirstMessage) 
+               : conversationDto.Title;                      
+
             var conversation = new Conversation()
             {
-                 User_ID=conversationDto.userid,
-                 Title=conversationDto.Title,
-                 Created_At=egyptTime,
-                 Last_Activity=egyptTime
-
+                User_ID = conversationDto.userid,
+                Title = title,
+                FirstMessage = conversationDto.FirstMessage,
+                Created_At = egyptTime,
+                Last_Activity = egyptTime
             };
+
             await _context.Conversations.AddAsync(conversation);
             await _context.SaveChangesAsync();
-            
         }
+
+
+        //GenerateTitle هي مجرد دالة مساعدة (helper) وظيفتها: تاخد نص أول رسالة وترجع عنوان
+        //مش لازم تكون في الـ interface (IConversationRepository)
+        private string GenerateTitle(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return "New Conversation";
+
+            var words = message.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            // لو الرسالة أقل من 5 كلمات رجّعها كلها
+            if (words.Length <= 5)
+                return string.Join(" ", words);
+
+            // غير كده رجّع أول 5 كلمات
+            return string.Join(" ", words.Take(5)) + "...";
+        }
+
+
+        public async Task<IEnumerable<ConversationSummaryDTO>> ConversationHistory(int userId)
+        {
+            var conversations = await _context.Conversations
+                .Where(c => c.User_ID == userId && !c.Is_Archived)
+                .OrderByDescending(c => c.Last_Activity)
+                .ToListAsync();
+
+            var summaries = new List<ConversationSummaryDTO>();
+
+            foreach (var conv in conversations)
+            {
+                summaries.Add(new ConversationSummaryDTO
+                {
+                    Conversations_ID = conv.Conversations_ID,
+                    Title = !string.IsNullOrWhiteSpace(conv.Title)
+                            ? conv.Title
+                            : GenerateTitle(conv.FirstMessage),
+                    Last_Activity = conv.Last_Activity,
+                    // LastMessage = null
+                });
+            }
+
+            return summaries;
+        }
+
+
+        public async Task<ConversationContentDTO> OpenConversation(int conversationid)
+        {
+            var conversation = await _context.Conversations
+                .Include(c => c.messages)
+                .FirstOrDefaultAsync(c => c.Conversations_ID == conversationid);
+
+            if (conversation == null)
+                return null;
+
+            return new ConversationContentDTO
+            {
+                ConversationId = conversation.Conversations_ID,
+                Title = conversation.Title,
+                Messages = conversation.messages
+                    .OrderBy(m => m.Created_At)
+                    .Select(m => new MessageDTO
+                    {
+                        Sender_Type = m.Sender_Type,
+                        Text = m.Content,
+                        Time = m.Created_At.UtcDateTime
+                    }).ToList()
+            };
+        }
+
+
+        public async Task<IEnumerable<ConversationContentDTO>> GetConversationHistoryWithMessages(int userId)
+        {
+            var conversations = await _context.Conversations
+                .Where(c => c.User_ID == userId && !c.Is_Archived)
+                .Include(c => c.messages)           // ⬅️ جلب كل الرسائل
+                .OrderByDescending(c => c.Last_Activity) // ⬅️ ترتيب من الأحدث للأقدم
+                .ToListAsync();
+
+            var result = new List<ConversationContentDTO>();
+
+            foreach (var conv in conversations)
+            {
+                result.Add(new ConversationContentDTO
+                {
+                    ConversationId = conv.Conversations_ID,
+                    Title = !string.IsNullOrWhiteSpace(conv.Title)
+                            ? conv.Title
+                            : GenerateTitle(conv.FirstMessage), // لو عايز تولد عنوان تلقائي
+                    Messages = conv.messages
+                                .OrderBy(m => m.Created_At) // ترتيب الرسائل من الأقدم للأحدث
+                                .Select(m => new MessageDTO
+                                {
+                                    Sender_Type = m.Sender_Type,
+                                    Text = m.Content,
+                                    Time = m.Created_At.UtcDateTime
+                                }).ToList(),
+                    Last_Activity = conv.Last_Activity // لو محتاج تعرض آخر نشاط
+                });
+            }
+
+            return result;
+        }
+
+        public async Task DeleteConversation(Conversation conversation)
+        {
+
+            _context.Conversations.Remove(conversation);
+            await _context.SaveChangesAsync();
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public async Task<bool>UpdateTitle(int Id, string NewTitle)
         {
@@ -86,13 +215,7 @@ namespace Empath_AI.Repository
             return true;      
         }
 
-        public async Task DeleteConversation(Conversation conversation )
-        {
-            
-            _context.Conversations.Remove(conversation);
-            await _context.SaveChangesAsync();
-            
-        }    
+
         
         public async Task<IEnumerable<Conversation>>SearchConversationByTitle(int UserId,string KeyWord)
         {
@@ -148,20 +271,58 @@ namespace Empath_AI.Repository
             _context.SaveChangesAsync();
             return true;
         }
-
-        public async Task<bool>OpenConversation(int conversationid)
-        {
-            var con = await GetConversationById(conversationid);
-            if (con == null)
-                return false;
-
-            con.Last_Activity = DateTime.UtcNow;
-            _context.Conversations.Update(con);
-           await _context.SaveChangesAsync();
-           return true;
+        
 
 
-        }
+
+
+
+
+
+
+
+        
+
+
+        //------------------------------------------------------------------------------------------------------------
+
+        //public async Task<IEnumerable<ConversationContentDTO>> GetConversationHistoryWithMessages(int userId)
+        //{
+        //    var conversations = await _context.Conversations
+        //        .Where(c => c.User_ID == userId && !c.Is_Archived)
+        //        .Include(c => c.messages)           // ⬅️ جلب كل الرسائل
+        //        .OrderByDescending(c => c.Last_Activity) // ⬅️ ترتيب من الأحدث للأقدم
+        //        .ToListAsync();
+
+        //    var result = new List<ConversationContentDTO>();
+
+        //    foreach (var conv in conversations)
+        //    {
+        //        result.Add(new ConversationContentDTO
+        //        {
+        //            ConversationId = conv.Conversations_ID,
+        //            Title = !string.IsNullOrWhiteSpace(conv.Title)
+        //                    ? conv.Title
+        //                    : GenerateTitle(conv.FirstMessage), // لو عايز تولد عنوان تلقائي
+        //            Messages = conv.messages
+        //                        .OrderBy(m => m.Created_At) // ترتيب الرسائل من الأقدم للأحدث
+        //                        .Select(m => new MessageDTO
+        //                        {
+        //                            Sender_Type = m.Sender_Type,
+        //                            Text = m.Content,
+        //                            Time = m.Created_At.UtcDateTime
+        //                        }).ToList(),
+        //            Last_Activity = conv.Last_Activity // لو محتاج تعرض آخر نشاط
+        //        });
+        //    }
+
+        //    return result;
+        //}
+
+
+
+
+
 
         public async Task<Conversation?> GetActiveConversationAsync(int userId)
         {
@@ -170,6 +331,7 @@ namespace Empath_AI.Repository
                 .OrderByDescending(c => c.Last_Activity)
                 .FirstOrDefaultAsync();
         }
+
 
 
 

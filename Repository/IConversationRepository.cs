@@ -20,7 +20,11 @@ namespace Empath_AI.Repository
         Task<List<Empath_AI.Model.Message>> GetConversationMessages(int conversationId);
         Task<List<ConversationSummaryDTO>> GetConversationSummeries(int UserID);
         Task<bool> ArchiveConversation(int conversationid);
-        Task<bool> OpenConversation(int conversationid);
+        Task<ConversationContentDTO> OpenConversation(int conversationid);
+        Task<IEnumerable<ConversationSummaryDTO>> ConversationHistory(int userId);
+        Task<IEnumerable<ConversationContentDTO>> GetConversationHistoryWithMessages(int userId);
+
         Task<Conversation?> GetActiveConversationAsync(int userId);
+
     }
 }
