@@ -158,9 +158,10 @@ namespace Empath_AI.Controllers
             if (!saved)
                 return NotFound("Email not found");
 
-            var resetLink = $"https://your-frontend-app.com/reset-password?token={token}";
+            var resetLink = $"https://www.youtube.com/";
             await _emailService.SendEmailAsync(model.Email, "Reset Your Password",
-                $"Click the link to reset your password: {resetLink}");
+                 $"<a href='{resetLink}'>Click here to reset your password</a>");
+
 
             return Ok("Reset link sent to your email.");
         }

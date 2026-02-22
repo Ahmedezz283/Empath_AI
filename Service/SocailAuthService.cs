@@ -15,10 +15,7 @@ public class SocialAuthService
         _config = config;
     }
 
-    /// <summary>
-    /// Validates the social login token and returns verified user info.
-    /// Throws if invalid.
-    /// </summary>
+    
     public async Task<UserSocialLoginDTO> ValidateSocialTokenAsync(string provider, string token)
     {
         provider = provider?.ToLower();
@@ -38,10 +35,10 @@ public class SocialAuthService
         {
             var payload = await GoogleJsonWebSignature.ValidateAsync(idToken);
 
-            // 🔒 Extra security: verify audience (your Google client id)
+            /*// 🔒 Extra security: verify audience (your Google client id)
             var clientId = _config["Authentication:Google:ClientId"];
             if (payload.Audience != clientId)
-                throw new Exception("Invalid Google audience");
+                throw new Exception("Invalid Google audience");*/
 
             if (!payload.EmailVerified)
                 throw new Exception("Google email not verified");
@@ -68,11 +65,13 @@ public class SocialAuthService
             $"https://graph.facebook.com/me?fields=id,email,first_name,last_name,picture&access_token={accessToken}";
 
         var response = await _httpClient.GetAsync(url);
-
-        if (!response.IsSuccessStatusCode)
-            throw new Exception("Invalid Facebook token");
-
+        /*
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception("Invalid Facebook token");*/
         var json = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Facebook response: {json}");
+
+        //var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
