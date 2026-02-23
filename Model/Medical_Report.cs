@@ -10,7 +10,7 @@ public class Medical_Report
     public bool HasHeartProblem { get; set; }
     public bool HasDiabetes { get; set; }
     public bool IsSmoker { get; set; }
-
+    public bool HasAMentalIllness { get; set; }
     public int UserId { get; set; }
     public User? User { get; set; }
 
