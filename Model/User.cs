@@ -26,11 +26,6 @@ namespace Empath_AI.Model
 
         public DateTimeOffset Created_At { get; set; } = DateTimeOffset.UtcNow;
 
-        internal void Deconstruct(out object user, out object refreshToken)
-        {
-            throw new NotImplementedException();
-        }
-
         //public ICollection<Conversation> conversations { get; set; }
     }
 }
