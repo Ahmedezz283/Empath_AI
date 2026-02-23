@@ -88,16 +88,17 @@ namespace Empath_AI.Controllers
         //}
 
 
+        [Authorize]
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] ConversationDTO conversationDTO)
         {
-            /* var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-             if (string.IsNullOrEmpty(userIdClaim))
-                 return Unauthorized("User ID not found in token");*/
-            int userIdClaim = 13;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized("User ID not found in token");
+         
 
-            conversationDTO.userid = userIdClaim;
+            conversationDTO.userid =  int.Parse( userIdClaim);
 
 
             await _conversationRepository.CreateConversation(conversationDTO);

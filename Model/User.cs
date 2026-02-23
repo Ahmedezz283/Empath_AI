@@ -1,4 +1,6 @@
-﻿namespace Empath_AI.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Empath_AI.Model
 {
     public class User
     {

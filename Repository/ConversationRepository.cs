@@ -47,10 +47,10 @@ namespace Empath_AI.Repository
             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
 
-            // توليد العنوان
-            string title = string.IsNullOrWhiteSpace(conversationDto.Title)
-               ? GenerateTitle(conversationDto.FirstMessage) 
-               : conversationDto.Title;                      
+            string title = string.IsNullOrWhiteSpace(conversationDto.Title?.Trim())
+                || conversationDto.Title == "string"
+                ? GenerateTitle(conversationDto.FirstMessage)
+                : conversationDto.Title.Trim();
 
             var conversation = new Conversation()
             {
@@ -160,8 +160,10 @@ namespace Empath_AI.Repository
                                 .Select(m => new MessageDTO
                                 {
                                     Sender_Type = m.Sender_Type,
-                                    Text = m.Content,
-                                    Time = m.Created_At.UtcDateTime
+                                    Content = m.Content,
+                                    Time = m.Created_At.UtcDateTime,
+                                    Conversation_ID = m.Conversation_ID,
+                                    UserId = (int)m.User_ID,
                                 }).ToList(),
                     Last_Activity = conv.Last_Activity // لو محتاج تعرض آخر نشاط
                 });
