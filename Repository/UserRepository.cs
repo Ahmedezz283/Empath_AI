@@ -103,7 +103,6 @@ namespace Empath_AI.Repository
 
             bool hasChanges = false;
 
-            // Generic helper for strings: ignore null, empty, or placeholder "string"
             string SetIfChangedString(string? newValue, string currentValue)
             {
                 if (!string.IsNullOrWhiteSpace(newValue) && newValue.ToLower() != "string" && newValue != currentValue)
@@ -114,7 +113,6 @@ namespace Empath_AI.Repository
                 return currentValue;
             }
 
-            // Generic helper for nullable ints: ignore 0 (or any other placeholder)
             int SetIfChangedInt(int? newValue, int currentValue)
             {
                 if (newValue.HasValue && newValue.Value != 0 && newValue.Value != currentValue)
@@ -125,7 +123,6 @@ namespace Empath_AI.Repository
                 return currentValue;
             }
 
-            // Apply only meaningful changes
             user.First_Name = SetIfChangedString(usernm.First_Name, user.First_Name);
             user.Last_Name = SetIfChangedString(usernm.Last_Name, user.Last_Name);
             user.Email = SetIfChangedString(usernm.Email, user.Email);
@@ -143,7 +140,6 @@ namespace Empath_AI.Repository
                 }
             }
 
-            // 🔥 Only save if something actually changed
             if (!hasChanges)
                 return true;
 

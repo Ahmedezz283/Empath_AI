@@ -40,6 +40,7 @@ namespace Empath_AI.Repository
                 HasDiabetes = model.HasDiabetes,
                 IsSmoker = model.IsSmoker,
                 CreatedAt = egyptTime,
+                HasAMentalIllness = model.HasAMentalIllness,
             };
 
             await _context.Medical_Reports.AddAsync(report);
@@ -59,16 +60,47 @@ namespace Empath_AI.Repository
             {
                 return false;
             }
+            bool hasChanges = false;
 
-            user.Notes = usernm.Notes;
-            user.HasBloodPressure = usernm.HasBloodPressure;
-            user.HasHeartProblem = usernm.HasHeartProblem;
-            user.HasDiabetes = usernm.HasDiabetes;
-            user.IsSmoker = usernm.IsSmoker;
-            user.UpdatedAt = usernm.UpdatedAt;
+            string SetIfChangedString(string? newValue, string currentValue)
+            {
+                if (!string.IsNullOrWhiteSpace(newValue) && newValue.ToLower() != "string" && newValue != currentValue)
+                {
+                    hasChanges = true;
+                    return newValue;
+                }
+                return currentValue;
+            }
+
+            bool SetIfChangedBool(bool? newValue, bool currentValue)
+            {
+                if (newValue.HasValue && newValue.Value != currentValue)
+                {
+                    hasChanges = true;
+                    return newValue.Value;
+                }
+                return currentValue;
+            }
 
 
-            _context.Medical_Reports.Update(user);
+            user.IsSmoker = SetIfChangedBool(usernm.IsSmoker, user.IsSmoker);
+            user.HasHeartProblem = SetIfChangedBool(usernm.HasHeartProblem, user.HasHeartProblem);
+            user.HasBloodPressure = SetIfChangedBool(usernm.HasBloodPressure, user.HasBloodPressure);
+            user.HasDiabetes = SetIfChangedBool(usernm.HasDiabetes, user.HasDiabetes);
+            user.HasAMentalIllness = SetIfChangedBool(usernm.HasAMentalIllness, user.HasAMentalIllness);
+            user.Notes = SetIfChangedString(usernm.Notes, user.Notes);
+
+
+            void UpdateTimestamp()
+            {
+                user.UpdatedAt = DateTime.UtcNow;
+                hasChanges = true;
+            }
+
+            if (!hasChanges)
+                return true;
+
+
             await _context.SaveChangesAsync();
             return true;
         }
