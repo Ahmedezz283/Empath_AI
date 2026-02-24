@@ -19,8 +19,14 @@ namespace Empath_AI.Repository
             _geminiService = geminiService;
         }
 
-        public async Task<Message> SaveUserMessageAsync(MessageDTO message , string content )
+        public async Task<Message> SaveUserMessageAsync(MessageDTO message, string content)
         {
+            // 🔍 Debug — remove after confirming it works
+            Console.WriteLine($"DEBUG SaveUserMessage → UserId={message.UserId}, Conversation_ID={message.Conversation_ID}, Content={content}");
+
+            if (message.Conversation_ID == 0)
+                throw new Exception("Conversation_ID is 0 — DTO deserialization failed. Check SignalR JSON naming policy.");
+
             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
 
@@ -36,6 +42,10 @@ namespace Empath_AI.Repository
 
             await _context.Messages.AddAsync(userMessage);
             await _context.SaveChangesAsync();
+
+            // Reload from DB so navigation properties and generated ID are populated
+            await _context.Entry(userMessage).ReloadAsync();
+
             return userMessage;
         }
         public async Task<Message> SaveBotMessageAsync(MessageDTO message, string content)

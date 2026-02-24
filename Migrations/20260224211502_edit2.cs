@@ -5,7 +5,7 @@
 namespace Empath_AI.Migrations
 {
     /// <inheritdoc />
-    public partial class dto : Migration
+    public partial class edit2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

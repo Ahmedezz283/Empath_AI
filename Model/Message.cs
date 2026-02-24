@@ -12,7 +12,7 @@ namespace Empath_AI.Model
         public int? Bot_ID { get; set; }     
         public int Device_ID { get; set; }
 
-        //[ForeignKey("Conversations_ID")]
+        [ForeignKey("conversation")]
         public int Conversation_ID { get; set; } 
 
         public string Content { get; set; }
