@@ -204,6 +204,7 @@ namespace Empath_AI.Repository
                         Time = m.Created_At.UtcDateTime,
                         Conversation_ID = m.Conversation_ID,
                         UserId = (int)m.User_ID,
+                        //UserId = m.User_ID ?? 0
                     }).ToList()
             };
         }
