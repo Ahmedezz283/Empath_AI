@@ -18,40 +18,90 @@ namespace Empath_AI.Hubs
         private readonly IMessageRepository _messageRepository;
         private readonly IHeartRateRepository _heart;
         private static readonly Dictionary<string, string> _connections = new();
+        private readonly IConversationRepository _conversationRepository;
         private int _connectionsCount = 0;
 
-        public ChatHub(IGeminiService gemini, IMessageRepository messageRepository , IHeartRateRepository heartRateRepository, IMessageRepository messageService)
+        public ChatHub(IGeminiService gemini, IMessageRepository messageRepository, IHeartRateRepository heartRateRepository, IMessageRepository messageService, IConversationRepository conversationRepository)
         {
             _gemini = gemini;
             _messageRepository = messageRepository;
             _heart = heartRateRepository;
+            _conversationRepository = conversationRepository;
         }
 
-        
-       /* public override Task OnConnectedAsync()
-        {
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId != null)
-            {
-                _connections[userId] = Context.ConnectionId;
-                _connectionsCount++;
-                Console.WriteLine($"User connected: {userId}");
-            }
-            return base.OnConnectedAsync();
-        }
 
-        public override Task OnDisconnectedAsync(Exception? exception)
+        /* public override Task OnConnectedAsync()
+         {
+             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+             if (userId != null)
+             {
+                 _connections[userId] = Context.ConnectionId;
+                 _connectionsCount++;
+                 Console.WriteLine($"User connected: {userId}");
+             }
+             return base.OnConnectedAsync();
+         }
+
+         public override Task OnDisconnectedAsync(Exception? exception)
+         {
+             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+             if (userId != null)
+             {
+                 _connections.Remove(userId);
+                 _connectionsCount--;
+                 Console.WriteLine($"User disconnected: {userId}");
+             }
+             return base.OnDisconnectedAsync(exception);
+         }
+ */
+
+       /* public async Task StartConversation(int userId)
         {
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId != null)
+            try
             {
-                _connections.Remove(userId);
-                _connectionsCount--;
-                Console.WriteLine($"User disconnected: {userId}");
+                var conversationId = await _conversationRepository.CreateConversation(userId);
+
+                await Clients.Caller.SendAsync("ConversationCreated", new
+                {
+                    conversationId,
+                    userId
+                });
             }
-            return base.OnDisconnectedAsync(exception);
-        }
-*/
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("ReceiveError", $"Failed to create conversation: {ex.Message}");
+            }
+        }*/
+
+        // In ChatHub.cs — replace SendMessage with this:
+        /*public async Task SendMessage(int userId, int conversationId, string content)
+        {
+            Console.WriteLine($">>> userId={userId}, conversationId={conversationId}, content={content}");
+
+            var messageDTO = new MessageDTO
+            {
+                UserId = userId,
+                Conversation_ID = conversationId
+            };
+
+            var userMessage = await _messageRepository.SaveUserMessageAsync(messageDTO, content);
+
+            var systemPrompt = @"You are EmpathAI — an emotional wellness companion.
+         You must always be empathetic and supportive, detect emotional tone,
+         suggest grounding strategies, never give medical/legal/harmful advice,
+         and if user is in crisis → encourage contacting real professionals.";
+
+            var (success, reply, error) = await _gemini.GenerateTextAsync(systemPrompt, content);
+            string final_reply = success ? reply : "Please try again later";
+
+            var botMessage = await _messageRepository.SaveBotMessageAsync(messageDTO, final_reply);
+
+            await Clients.Caller.SendAsync("ReceiveMessage", new
+            {
+                user = userMessage,
+                bot = botMessage
+            });
+        }*/
 
         public async Task SendMessage(MessageDTO messageDTO, string content)
         {
@@ -71,14 +121,14 @@ namespace Empath_AI.Hubs
 
             // 2️⃣ Prepare the AI system prompt
             var systemPrompt = @"
-             You are EmpathAI — an emotional wellness companion.
-             You must always:
-             - be empathetic and supportive
-             - detect emotional tone
-             - suggest grounding / safe mental self-help strategies
-             - never give medical, legal, or harmful advice
-             - if user is in crisis → encourage contacting real professionals
-             ";
+              You are EmpathAI — an emotional wellness companion.
+              You must always:
+              - be empathetic and supportive
+              - detect emotional tone
+              - suggest grounding / safe mental self-help strategies
+              - never give medical, legal, or harmful advice
+              - if user is in crisis → encourage contacting real professionals
+              ";
 
             // 3️⃣ Call Gemini to generate AI reply
             var (success, reply, error) = await _gemini.GenerateTextAsync(systemPrompt, content);
@@ -93,19 +143,18 @@ namespace Empath_AI.Hubs
             {
                 wrong = $"[Gemini Error] {error}";
                 final_reply = "Please try again later";
-                //await Clients.Caller.SendAsync(final_reply);
+                await Clients.Caller.SendAsync(final_reply);
             }
 
-           var botMessage = await _messageRepository.SaveBotMessageAsync(messageDTO, final_reply);
+            var botMessage = await _messageRepository.SaveBotMessageAsync(messageDTO, final_reply);
             // 4️⃣ Save bot message
-           
+
             // 5️⃣ Send result to the caller or all connected clients
             await Clients.Caller.SendAsync("ReceiveMessage", new
             {
                 user = userMessage,
                 bot = botMessage
             });
-
         }
         public async Task SendAudioBase64(MessageDTO messageDTO, string base64Audio, string mimeType)
         {

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Empath_AI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260223215106_dto")]
-    partial class dto
+    [Migration("20260224211502_edit2")]
+    partial class edit2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -148,9 +148,6 @@ namespace Empath_AI.Migrations
                     b.Property<int>("Conversation_ID")
                         .HasColumnType("int");
 
-                    b.Property<int>("Conversations_ID")
-                        .HasColumnType("int");
-
                     b.Property<DateTimeOffset>("Created_At")
                         .HasColumnType("datetimeoffset");
 
@@ -170,7 +167,7 @@ namespace Empath_AI.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("Conversations_ID");
+                    b.HasIndex("Conversation_ID");
 
                     b.ToTable("Messages");
                 });
@@ -324,7 +321,7 @@ namespace Empath_AI.Migrations
                 {
                     b.HasOne("Empath_AI.Model.Conversation", "conversation")
                         .WithMany("messages")
-                        .HasForeignKey("Conversations_ID")
+                        .HasForeignKey("Conversation_ID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -203,7 +203,8 @@ namespace Empath_AI.Repository
                         Content = m.Content,
                         Time = m.Created_At.UtcDateTime,
                         Conversation_ID = m.Conversation_ID,
-                        UserId = (int)m.User_ID,
+                        UserId = m.User_ID,
+                        bot_id = m.Bot_ID,
                     }).ToList()
             };
         }
@@ -288,7 +289,8 @@ namespace Empath_AI.Repository
                                 Content = m.Content,
                                 Time = m.Created_At.UtcDateTime,
                                 Conversation_ID = m.Conversation_ID,
-                                UserId = (int)m.User_ID,
+                                UserId = m.User_ID,
+                                bot_id = m.Bot_ID,
                             }).ToList(),
                 Last_Activity = conv.Last_Activity
             }).ToList();
