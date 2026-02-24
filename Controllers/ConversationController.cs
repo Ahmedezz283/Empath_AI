@@ -88,23 +88,49 @@ namespace Empath_AI.Controllers
         //}
 
 
+        //[Authorize]
+        //[HttpPost("create")]
+        //public async Task<IActionResult> Create([FromBody] ConversationDTO conversationDTO)
+        //{
+        //    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        //    if (string.IsNullOrEmpty(userIdClaim))
+        //        return Unauthorized("User ID not found in token");
+
+
+        //    conversationDTO.userid =  int.Parse( userIdClaim);
+
+
+        //    await _conversationRepository.CreateConversation(conversationDTO);
+        //    return Ok("conversation created succsessfully");
+
+
+
+        //}
+
         [Authorize]
         [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] ConversationDTO conversationDTO)
+        public async Task<IActionResult> Create()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userIdClaim))
                 return Unauthorized("User ID not found in token");
-         
 
-            conversationDTO.userid =  int.Parse( userIdClaim);
+            var userId = int.Parse(userIdClaim);
 
+            var conversationId = await _conversationRepository.CreateConversation(userId);
 
-            await _conversationRepository.CreateConversation(conversationDTO);
-            return Ok("conversation created succsessfully");
-
+            return Ok(new { conversationId });
         }
+
+
+
+
+
+
+
+
 
 
         //[HttpDelete("delete")]
