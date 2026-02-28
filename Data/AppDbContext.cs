@@ -14,16 +14,7 @@ namespace Empath_AI.Data
         public DbSet<HeartRateRecord> Hearts { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Medical_Report> Medical_Reports { get; set; }
-
-           private  void onModelCreating(ModelBuilder modelBuilder)
-        {
-        //    modelBuilder.Entity<Conversation>()
-        // .HasMany(c => c.messages)
-        // .WithOne(m => m.)
-        // .hasforeignkey(modelBuilder => modelBuilder.conversation_ID);
-        }
-
-
-
+        public DbSet<Accelerometer> Accelerometer { get; set; }
+        public DbSet<GSRRecord> GSRRecords { get; set; }    
     }
 }

@@ -115,6 +115,7 @@ namespace Empath_AI.Hubs
             }
 
             messageDTO.UserId = int.Parse(userId);
+            
 
             // 1️⃣ Save the user’s message first
             var userMessage = await _messageRepository.SaveUserMessageAsync(messageDTO, content);
