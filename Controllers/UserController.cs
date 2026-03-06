@@ -192,12 +192,16 @@ namespace Empath_AI.Controllers
             return Ok("Password reset successfully.");
         }
 
+        [Authorize]
         [HttpGet("profile")]
-        public async Task<IActionResult> GetProfile(string email)
+        public async Task<IActionResult> GetProfile()
         {
-            var user = await _user.FindUser(email);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var user = await _user.FindUser(userId);
+
             if (user == null)
                 return NotFound("User not found");
+
             return Ok(user);
         }
 
@@ -226,6 +230,82 @@ namespace Empath_AI.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var result = await _user.Logout(userId);
 
+            if (!result)
+                return NotFound("User not found");
+
+            return Ok("Logged out successfully");
+        }
+
+        [Authorize]
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var user = await _user.FindUser(userId);
+            if (user == null)
+                return NotFound("User not found");
+
+            await _user.Delete(user);
+            return Ok("Account deleted successfully");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _user.FindUser(id);
+            if (user == null)
+                return NotFound("User not found");
+
+            await _user.Delete(user);
+            return Ok("User deleted successfully");
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] UserChangePasswordDTO model)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var user = await _user.FindUser(userId);
+
+            if (user == null)
+                return NotFound("User not found");
+
+            if (!BCrypt.Net.BCrypt.Verify(model.OldPassword, user.Password))
+                return BadRequest("Current password is incorrect");
+
+            if (model.NewPassword != model.ConfirmNewPassword)
+                return BadRequest("Passwords do not match");
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+            user.Confirm_Password = user.Password;
+            await _context.SaveChangesAsync();
+
+            return Ok("Password changed successfully");
+        }
+
+        [Authorize]
+        [HttpPost("emergency-contact")]
+        public async Task<IActionResult> UpdateEmergencyContact([FromBody] string emergencyContact)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var user = await _user.FindUser(userId);
+
+            if (user == null)
+                return NotFound("User not found");
+
+            user.Emergancy_Contact = emergencyContact;
+            await _context.SaveChangesAsync();
+
+            return Ok("Emergency contact updated successfully");
+        }
     }
 }

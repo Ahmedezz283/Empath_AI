@@ -198,6 +198,17 @@ namespace Empath_AI.Repository
                 }
         */
 
+        public async Task<bool> Logout(int userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return false;
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpires = null;
+            await _context.SaveChangesAsync();
+            return true;
+        }
         public async Task<(User user, string refreshToken)> SocialLoginAsync(UserSocialLoginDTO model)
         {
             // 1️⃣ Validate token and get full user info

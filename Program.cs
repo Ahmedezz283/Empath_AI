@@ -78,7 +78,7 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true, //مين اللى بيعمل التوكين
+        ValidateIssuer = true,
         ValidIssuer = config["JWT:Issure"],
         ValidateAudience = true,
         ValidAudience = config["JWT:Audience"],
