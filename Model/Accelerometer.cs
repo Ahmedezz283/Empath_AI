@@ -16,7 +16,9 @@
 
         // Fall detection
         public bool FallDetected { get; set; }
-
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+        public int? DeviceId { get; set; }
+        public Devices Device { get; set; }
     }
 }

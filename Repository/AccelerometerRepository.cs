@@ -48,7 +48,7 @@ namespace Empath_AI.Repository
                 FallDetected = data.FallDetected,
                 Timestamp = egyptTime
             };
-
+            //  }
             await _context.Accelerometer.AddAsync(accelerometer);
 
             // device.Last_Active = egyptTime;

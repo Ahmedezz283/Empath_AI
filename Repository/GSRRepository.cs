@@ -19,14 +19,36 @@ namespace Empath_AI.Repository
             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
 
+            /*var device = await _context.Devices
+                .FirstOrDefaultAsync(d => d.DeviceToken == deviceToken && d.IsActive);
+
+            if (device == null)
+                return (false, "Unauthorized device");
+
+            var existingHeartRate = await _context.Hearts
+                     .FirstOrDefaultAsync(h => h.UserId == device.UserId);*/
+
+            /*if (existingHeartRate != null)
+            {
+                existingHeartRate.HeartRateValue = model.HeartRateValue;
+                existingHeartRate.Timestamp = egyptTime;
+                _context.Hearts.Update(existingHeartRate);
+            }
+            else*/
+            //{
+
             var record = new GSRRecord
             {
+                /* DeviceId = device.Id,
+                    UserId = device.UserId,*/
                 RawGSRValue = dto.RawGSRValue,
                 SkinConductance = dto.SkinConductance,
                 StressLevel = dto.StressLevel ?? "low",
                 StressScore = dto.StressScore,
                 Timestamp = egyptTime
             };
+
+            //  }
 
             await _context.GSRRecords.AddAsync(record);
             await _context.SaveChangesAsync();
