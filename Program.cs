@@ -53,6 +53,8 @@ builder.Services.AddScoped<IHeartRateRepository, HeartRateRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IMedicalReportRepository, MedicalReportRepository>();
+builder.Services.AddScoped<IAccelerometerRepository, AccelerometerRepository>();
+builder.Services.AddScoped<IGSRRepository, GSRRepository>();
 builder.Services.AddHttpClient<IGeminiService, GeminiService>(client =>
 {
     // We'll still pass API key as query param, but set Accept header
@@ -76,7 +78,7 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true, //مين اللى بيعمل التوكين
+        ValidateIssuer = true,
         ValidIssuer = config["JWT:Issure"],
         ValidateAudience = true,
         ValidAudience = config["JWT:Audience"],

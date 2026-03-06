@@ -4,6 +4,7 @@ using Empath_AI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Empath_AI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260228184227_GSR-Table")]
+    partial class GSRTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,9 +46,6 @@ namespace Empath_AI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DeviceId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("FallDetected")
                         .HasColumnType("bit");
 
@@ -59,10 +59,6 @@ namespace Empath_AI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Accelerometer");
                 });
@@ -153,9 +149,6 @@ namespace Empath_AI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("DeviceId")
-                        .HasColumnType("int");
-
                     b.Property<int>("RawGSRValue")
                         .HasColumnType("int");
 
@@ -172,14 +165,10 @@ namespace Empath_AI.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DeviceId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("GSRRecords");
                 });
@@ -207,8 +196,6 @@ namespace Empath_AI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DeviceId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Hearts");
                 });
@@ -369,21 +356,6 @@ namespace Empath_AI.Migrations
                     b.ToTable("Medical_Reports");
                 });
 
-            modelBuilder.Entity("Empath_AI.Model.Accelerometer", b =>
-                {
-                    b.HasOne("Empath_AI.Model.Devices", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Empath_AI.Model.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Device");
-                });
-
             modelBuilder.Entity("Empath_AI.Model.Conversation", b =>
                 {
                     b.HasOne("Empath_AI.Model.User", "user")
@@ -406,32 +378,11 @@ namespace Empath_AI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Empath_AI.Model.GSRRecord", b =>
-                {
-                    b.HasOne("Empath_AI.Model.Devices", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Empath_AI.Model.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Device");
-                });
-
             modelBuilder.Entity("Empath_AI.Model.HeartRateRecord", b =>
                 {
                     b.HasOne("Empath_AI.Model.Devices", "Device")
                         .WithMany()
-                        .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Empath_AI.Model.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("DeviceId");
 
                     b.Navigation("Device");
                 });
