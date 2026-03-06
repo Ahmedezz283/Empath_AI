@@ -175,15 +175,16 @@ namespace Empath_AI.Controllers
             if (user == null)
                 return BadRequest("Invalid or expired token.");
 
+            if (user.Password != user.Confirm_Password)
+            {
+                return Unauthorized("Not the same Password");
+            }
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
             user.Confirm_Password = BCrypt.Net.BCrypt.HashPassword(model.Confirm_Password);
             user.ResetToken = null;
             user.ResetTokenExpires = null;
 
-            if (user.Password != user.Confirm_Password)
-            {
-                return Unauthorized("Not the same Password");
-            }
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
