@@ -187,7 +187,7 @@ namespace Empath_AI.Controllers
 
 
 
-        [HttpPost("OpenConversation/{conversationid}")]
+        [HttpGet("OpenConversation/{conversationid}")]
         public async Task<IActionResult> OpenConversation(int conversationid)
         {
             var c = await _conversationRepository.OpenConversation(conversationid);
@@ -199,12 +199,23 @@ namespace Empath_AI.Controllers
         }
 
 
-        [HttpGet("ConversationHistory/{userId}")]
-        public async Task<IActionResult> ConversationHistory(int userId)
+
+        [Authorize]
+        [HttpGet("ConversationHistory")]
+        public async Task<IActionResult> ConversationHistory()
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized("User ID not found in token");
+
+            var userId = int.Parse(userIdClaim);
+
             var result = await _conversationRepository.ConversationHistory(userId);
+
             return Ok(result);
         }
+
 
 
         [HttpGet("ConversationHistoryWithMessages/{userId}")]
