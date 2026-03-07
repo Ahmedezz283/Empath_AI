@@ -64,7 +64,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Accelerometer");
+                    b.ToTable("Accelerometer", (string)null);
                 });
 
             modelBuilder.Entity("Empath_AI.Model.Conversation", b =>
@@ -104,7 +104,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("User_ID");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Conversations", (string)null);
                 });
 
             modelBuilder.Entity("Empath_AI.Model.Devices", b =>
@@ -142,7 +142,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Devices");
+                    b.ToTable("Devices", (string)null);
                 });
 
             modelBuilder.Entity("Empath_AI.Model.GSRRecord", b =>
@@ -181,7 +181,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("GSRRecords");
+                    b.ToTable("GSRRecords", (string)null);
                 });
 
             modelBuilder.Entity("Empath_AI.Model.HeartRateRecord", b =>
@@ -210,7 +210,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Hearts");
+                    b.ToTable("Hearts", (string)null);
                 });
 
             modelBuilder.Entity("Empath_AI.Model.Message", b =>
@@ -252,7 +252,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("Conversation_ID");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("Empath_AI.Model.User", b =>
@@ -324,7 +324,7 @@ namespace Empath_AI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Medical_Report", b =>
@@ -366,7 +366,7 @@ namespace Empath_AI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Medical_Reports");
+                    b.ToTable("Medical_Reports", (string)null);
                 });
 
             modelBuilder.Entity("Empath_AI.Model.Accelerometer", b =>

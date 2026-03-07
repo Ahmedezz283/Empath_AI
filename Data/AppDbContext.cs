@@ -84,6 +84,14 @@ namespace Empath_AI.Data
                 .WithMany()
                 .HasForeignKey(h => h.DeviceId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            ////Message -> Conversation
+            //modelBuilder.Entity<Message>()
+            //    .HasOne(m => m.conversation)
+            //    .WithMany(c => c.messages)
+            //    .HasForeignKey(m => m.Conversation_ID)
+            //    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
