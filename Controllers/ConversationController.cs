@@ -200,22 +200,13 @@ namespace Empath_AI.Controllers
 
 
 
-        [Authorize]
-        [HttpGet("ConversationHistory")]
-        public async Task<IActionResult> ConversationHistory()
+
+        [HttpGet("ConversationHistory/{userId}")]
+        public async Task<IActionResult> ConversationHistory(int userId)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim))
-                return Unauthorized("User ID not found in token");
-
-            var userId = int.Parse(userIdClaim);
-
             var result = await _conversationRepository.ConversationHistory(userId);
-
             return Ok(result);
         }
-
 
 
         [HttpGet("ConversationHistoryWithMessages/{userId}")]
