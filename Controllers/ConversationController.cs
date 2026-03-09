@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Empath_AI.Controllers
@@ -127,24 +128,6 @@ namespace Empath_AI.Controllers
 
 
 
-
-
-
-        //[HttpDelete("delete")]
-        //public async Task<IActionResult> Delete()
-        //{
-        //    var userId = int.Parse(User.FindFirst("UserId").Value);
-
-        //    var conv = await _conversationRepository.GetConversationByUserId(userId);
-
-        //    if (conv == null)
-        //        return NotFound("Conversation not found");
-
-        //    await _conversationRepository.DeleteConversation();
-        //    return Ok("Conversation deleted");
-        //}
-
-
         //[HttpDelete("id")]
         //public async Task<IActionResult> Delete(int id)
         //{
@@ -157,31 +140,22 @@ namespace Empath_AI.Controllers
         //    return Ok("Conversation deleted");
         //}
 
-
         [Authorize]
-        [HttpDelete("{conversationId}")]
-        public async Task<IActionResult> DeleteConversation(int conversationId)
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteConversation([FromBody] DeleteConversationDto dto)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var conversation = await _context.Conversations
+                .FirstOrDefaultAsync(c => c.Conversations_ID == dto.ConversationId && c.User_ID == userId);
 
-            if (string.IsNullOrEmpty(userIdClaim))
-                return Unauthorized("User ID not found in token");
-
-            int userId = int.Parse(userIdClaim);
-
-            var conv = await _conversationRepository.GetConversationById(conversationId);
-
-            if (conv == null)
+            if (conversation == null)
                 return NotFound("Conversation not found");
 
+            _context.Conversations.Remove(conversation);
+            await _context.SaveChangesAsync();
 
-            if (conv.User_ID != userId)
-                return StatusCode(403, "You are not allowed to delete this conversation");
-
-            await _conversationRepository.DeleteConversation(conv);
-
-            return Ok("Conversation deleted successfully");
+            return Ok("Conversation deleted");
         }
 
 
@@ -197,7 +171,6 @@ namespace Empath_AI.Controllers
             return Ok(c);
 
         }
-
 
 
 
