@@ -130,9 +130,6 @@ namespace Empath_AI.Controllers
 
 
 
-
-
-
         //[HttpDelete("delete")]
         //public async Task<IActionResult> Delete()
         //{
@@ -148,21 +145,49 @@ namespace Empath_AI.Controllers
         //}
 
 
-        [HttpDelete("id")] 
-        public async Task<IActionResult> Delete(int id)
+        //[HttpDelete("id")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    var conv = await _conversationRepository.GetConversationById(id);
+        //    if (conv == null)
+        //        return NotFound("Conversation not found");
+
+        //    await _conversationRepository.DeleteConversation(conv);
+
+        //    return Ok("Conversation deleted");
+        //}
+
+
+        [Authorize]
+        [HttpDelete("{conversationId}")]
+        public async Task<IActionResult> DeleteConversation(int conversationId)
         {
-            var conv = await _conversationRepository.GetConversationById(id); 
-            if (conv == null) 
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized("User ID not found in token");
+
+            int userId = int.Parse(userIdClaim);
+
+            var conv = await _conversationRepository.GetConversationById(conversationId);
+
+            if (conv == null)
                 return NotFound("Conversation not found");
 
-            await _conversationRepository.DeleteConversation(conv); 
 
-            return Ok("Conversation deleted"); 
+            if (conv.User_ID != userId)
+                return StatusCode(403, "You are not allowed to delete this conversation");
+
+            await _conversationRepository.DeleteConversation(conv);
+
+            return Ok("Conversation deleted successfully");
         }
 
 
 
-        [HttpPost("OpenConversation/{conversationid}")]
+
+        [HttpGet("OpenConversation/{conversationid}")]
         public async Task<IActionResult> OpenConversation(int conversationid)
         {
             var c = await _conversationRepository.OpenConversation(conversationid);
@@ -172,6 +197,8 @@ namespace Empath_AI.Controllers
             return Ok(c);
 
         }
+
+
 
 
         [HttpGet("ConversationHistory/{userId}")]
