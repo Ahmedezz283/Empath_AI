@@ -55,16 +55,16 @@ namespace Empath_AI.Hubs
 
         public async Task SendMessage(MessageDTO messageDTO, string content)
         {
-            /* var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-             if (string.IsNullOrEmpty(userId))
-             {
-                 Console.WriteLine("⚠ User ID not found in token. Connection unauthorized.");
-                 await Clients.Caller.SendAsync("ReceiveError", "Unauthorized: Invalid or missing token.");
-                 return;
-             }
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("⚠ User ID not found in token. Connection unauthorized.");
+                await Clients.Caller.SendAsync("ReceiveError", "Unauthorized: Invalid or missing token.");
+                return;
+            }
 
-             messageDTO.UserId = int.Parse(userId);*/
+            messageDTO.UserId = int.Parse(userId);
 
             // 1️⃣ Save the user’s message first
             var userMessage = await _messageRepository.SaveUserMessageAsync(messageDTO, content);
