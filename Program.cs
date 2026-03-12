@@ -105,6 +105,10 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
     };
 });
 
+//////////////////////////////////////////////////////////////////////////////
+//builder.Services.AddHostedService<DeleteOldConversationsService>();
+//////////////////////////////////////////////////////////////////////////////
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", policy =>

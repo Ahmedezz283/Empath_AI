@@ -212,6 +212,23 @@ namespace Empath_AI.Repository
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         //public async Task<IEnumerable<ConversationContentDTO>> GetConversationHistoryWithMessages(int userId)
         //{
         //    var conversations = await _context.Conversations
@@ -394,7 +411,25 @@ namespace Empath_AI.Repository
             _context.SaveChangesAsync();
             return true;
         }
-        
+
+        public async Task<bool> UnarchiveConversation(int conversationId)
+        {
+            var con = await GetConversationById(conversationId);
+            if (con == null)
+                return false;
+
+            con.Is_Archived = false;
+            _context.Conversations.Update(con);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
+
+
+
+
 
         //------------------------------------------------------------------------------------------------------------
 

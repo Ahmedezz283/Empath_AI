@@ -8,6 +8,8 @@
         public int userid { get; set; }
         public string? FirstMessage { get; set; }
 
+         public int conversationId { get; set; }
+
         
     }
 }

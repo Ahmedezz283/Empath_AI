@@ -140,6 +140,9 @@ namespace Empath_AI.Controllers
         //    return Ok("Conversation deleted");
         //}
 
+
+
+
         [Authorize]
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteConversation([FromBody] DeleteConversationDto dto)
@@ -173,13 +176,13 @@ namespace Empath_AI.Controllers
         }
 
 
-
         [HttpGet("ConversationHistory/{userId}")]
         public async Task<IActionResult> ConversationHistory(int userId)
         {
             var result = await _conversationRepository.ConversationHistory(userId);
             return Ok(result);
         }
+
 
 
         [HttpGet("ConversationHistoryWithMessages/{userId}")]
@@ -210,6 +213,20 @@ namespace Empath_AI.Controllers
 
             return Ok("Conversation archived");
         }
+
+
+        [HttpPut("unarchive/{id}")]
+        public async Task<IActionResult> Unarchive(int id)
+        {
+            var ok = await _conversationRepository.UnarchiveConversation(id);
+            if (!ok)
+                return NotFound("Conversation not found");
+
+            return Ok("Conversation unarchived");
+        }
+
+
+
 
         [HttpGet("search")]
         public async Task<IActionResult> Search(int userId, string keyword)
