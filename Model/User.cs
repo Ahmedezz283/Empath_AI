@@ -25,6 +25,9 @@ namespace Empath_AI.Model
         public DateTime? RefreshTokenExpires { get; set; }
 
         public DateTimeOffset Created_At { get; set; } = DateTimeOffset.UtcNow;
+        public string? OtpCode { get; set; }
+        public DateTime? OtpExpires { get; set; }
+        public bool IsVerified { get; set; } = false;
 
         //public ICollection<Conversation> conversations { get; set; }
     }

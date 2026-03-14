@@ -61,6 +61,8 @@ namespace Empath_AI.Controllers
             {
                 return Unauthorized("Invalid email or password");
             }
+            /*if (!existUser.IsVerified)
+                return Unauthorized("Please verify your account first. Check your email for the OTP.");*/
 
             var accessToken = _token.CreateToken(existUser);
             var refreshToken = _token.GenerateRefreshToken();
@@ -90,10 +92,10 @@ namespace Empath_AI.Controllers
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            var createdUser = await _user.FindUser(model.Email);
-            var accessToken = _token.CreateToken(createdUser);
+            /*var createdUser = await _user.FindUser(model.Email);
+            var accessToken = _token.CreateToken(createdUser);*/
 
-            return Ok(new { message = result.Message, result.id, Token = accessToken,});
+            return Ok(new { message = $"{ result.Message} check your email for an OTP", result.id/*, Token = accessToken,*/});
         }
 
         [HttpPost("upload-profile-picture")]
@@ -160,7 +162,101 @@ namespace Empath_AI.Controllers
 
             var resetLink = $"https://www.youtube.com/";
             await _emailService.SendEmailAsync(model.Email, "Reset Your Password",
-                 $"<a href='{resetLink}'>Click here to reset your password</a>");
+    $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    </head>
+    <body style='margin:0;padding:0;background-color:#f4f6fb;font-family:Arial,sans-serif;'>
+        
+        <!-- Wrapper -->
+        <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f4f6fb;padding:40px 0;'>
+            <tr>
+                <td align='center'>
+                    
+                    <!-- Card -->
+                    <table width='500' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);'>
+                        
+                        <!-- Header -->
+                        <tr>
+                            <td style='background:linear-gradient(135deg,#6C63FF,#a78bfa);padding:40px;text-align:center;'>
+                                <h1 style='color:#ffffff;margin:0;font-size:28px;font-weight:700;letter-spacing:1px;'>Empath AI</h1>
+                                <p style='color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;'>Your emotional wellness companion</p>
+                            </td>
+                        </tr>
+
+                        <!-- Body -->
+                        <tr>
+                            <td style='padding:40px;text-align:center;'>
+                                
+                                <!-- Icon -->
+                                <div style='width:64px;height:64px;background:#f0edff;border-radius:50%;margin:0 auto 24px;'>
+                                    <span style='font-size:28px;line-height:64px;'>🔑</span>
+                                </div>
+
+                                <h2 style='color:#1a1a2e;font-size:22px;margin:0 0 8px;'>Reset Your Password</h2>
+                                <p style='color:#6b7280;font-size:15px;margin:0 0 32px;line-height:1.6;'>
+                                    We received a request to reset your password.<br>
+                                    Click the button below to create a new one.
+                                </p>
+
+                                <!-- Reset Button -->
+                                <a href='{resetLink}' 
+                                   style='display:inline-block;background:linear-gradient(135deg,#6C63FF,#a78bfa);color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 40px;border-radius:12px;margin-bottom:32px;letter-spacing:0.5px;'>
+                                    Reset My Password
+                                </a>
+
+                                <!-- Warning -->
+                                <div style='background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 20px;margin-bottom:32px;'>
+                                    <p style='color:#c2410c;font-size:13px;margin:0;'>
+                                        ⏱️ This link expires in <strong>15 minutes</strong>
+                                    </p>
+                                </div>
+
+                                <!-- Fallback link -->
+                                <p style='color:#9ca3af;font-size:12px;margin:0 0 8px;'>
+                                    If the button doesn't work, copy and paste this link:
+                                </p>
+                                <p style='color:#6C63FF;font-size:12px;margin:0;word-break:break-all;'>
+                                    {resetLink}
+                                </p>
+
+                            </td>
+                        </tr>
+
+                        <!-- Divider -->
+                        <tr>
+                            <td style='padding:0 40px;'>
+                                <hr style='border:none;border-top:1px solid #f3f4f6;margin:0;'>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td style='padding:24px 40px;text-align:center;'>
+                                <p style='color:#9ca3af;font-size:12px;margin:0 0 4px;line-height:1.8;'>
+                                    If you didn't request a password reset, ignore this email.<br>
+                                    Your password will remain unchanged.
+                                </p>
+                                <p style='color:#9ca3af;font-size:12px;margin:8px 0 0;'>
+                                    © 2026 Empath AI · This is an automated message, please do not reply.
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                    <!-- End Card -->
+
+                </td>
+            </tr>
+        </table>
+        <!-- End Wrapper -->
+
+    </body>
+    </html>
+    ");
 
 
             return Ok("Reset link sent to your email.");
@@ -306,6 +402,30 @@ namespace Empath_AI.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Emergency contact updated successfully");
+        }
+
+        [HttpPost("send-otp")]
+        public async Task<IActionResult> SendOtp([FromBody] string email)
+        {
+            var result = await _user.SendOtpAsync(email);
+            if (!result)
+                return NotFound("Email not found");
+
+            return Ok("OTP sent to your email");
+        }
+
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] UserVerifyOtpDTO model)
+        {
+            var (success, message, id) = await _user.VerifyOtpAsync(model.Email, model.Otp);
+            if (!success)
+                return BadRequest(message);
+
+            
+            var user = await _user.FindUser(model.Email);
+            var token = _token.CreateToken(user);
+
+            return Ok(new { message, id, Token = token });
         }
     }
 }

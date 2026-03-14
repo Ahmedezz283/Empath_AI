@@ -15,5 +15,7 @@ namespace Empath_AI.Repository
         Task<bool> GeneratePasswordResetTokenAsync(string email, string token);
         Task<(User user, string refreshToken)> SocialLoginAsync(UserSocialLoginDTO model);
         Task<bool> Logout(int userId);
+        Task<bool> SendOtpAsync(string email);
+        Task<(bool Success, string Message, int? id)> VerifyOtpAsync(string email, string otp);
     }
 }
