@@ -12,7 +12,9 @@ namespace Empath_AI.Services
             {
                 FirebaseApp.Create(new AppOptions
                 {
-                    Credential = GoogleCredential.FromFile("firebase-adminsdk.json")
+                    Credential = GoogleCredential.FromFile(
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "empath-ai-29ea1-firebase-adminsdk-fbsvc-57baf752be.json")
+                    )
                 });
             }
         }
