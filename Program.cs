@@ -112,13 +112,21 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5280", "http://127.0.0.1:5280", "null") // allow your frontend origins
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        .WithOrigins(
+            "http://localhost:8100",
+            "http://localhost:8101",
+            "http://127.0.0.1:8100",
+            "https://localhost",
+            "capacitor://localhost",
+            "ionic://localhost",
+            "https://empath-ai.runasp.net"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
