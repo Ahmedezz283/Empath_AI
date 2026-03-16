@@ -30,4 +30,10 @@
     <Folder Include="Properties\الجدييييييييييد\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="empath-ai-29ea1-firebase-adminsdk-fbsvc-57baf752be.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

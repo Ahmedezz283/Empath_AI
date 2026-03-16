@@ -64,6 +64,7 @@ builder.Services.AddHttpClient<IGeminiService, GeminiService>(client =>
 builder.Services.AddHttpClient<SocialAuthService>();
 builder.Services.AddScoped<Email>();
 builder.Services.AddScoped<Token>();
+builder.Services.AddSingleton<FcmService>();
 //builder.Services.AddScoped<Bot>();
 builder.Services.AddSignalR(options =>
 {

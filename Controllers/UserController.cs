@@ -3,6 +3,7 @@ using Empath_AI.DTO.User;
 using Empath_AI.Model;
 using Empath_AI.Repository;
 using Empath_AI.Service;
+using Empath_AI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -25,14 +26,16 @@ namespace Empath_AI.Controllers
         private readonly IConfiguration config;
         private readonly Email _emailService;
         private readonly Token _token;
+        private readonly FcmService _fcmService;
 
-        public UserController(AppDbContext context, IUserRepository user, IConfiguration configuration, Email emailService, Token token)
+        public UserController(AppDbContext context, IUserRepository user, IConfiguration configuration, Email emailService, Token token, FcmService fcmService)
         {
             _context = context;
             _user = user;
             config = configuration;
             _emailService = emailService;
             _token = token;
+            _fcmService = fcmService;
         }
 
         [Authorize (Roles = "Admin")]
@@ -426,6 +429,42 @@ namespace Empath_AI.Controllers
             var token = _token.CreateToken(user);
 
             return Ok(new { message, id, Token = token });
+        }
+
+        [Authorize]
+        [HttpPost("save-fcm-token")]
+        public async Task<IActionResult> SaveFcmToken([FromBody] string fcmToken)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var user = await _user.FindUser(userId);
+
+            if (user == null)
+                return NotFound("User not found");
+
+            user.FcmToken = fcmToken;
+            await _context.SaveChangesAsync();
+
+            return Ok("FCM token saved");
+        }
+
+        [HttpPost("test-notification")]
+        public async Task<IActionResult> TestNotification([FromBody] string fcmToken)
+        {
+            var result = await _fcmService.SendNotificationAsync(
+                fcmToken,
+                "Empath AI 💬",
+                "This is a test notification from the backend!",
+                new Dictionary<string, string>
+                {
+            { "conversationId", "1" },
+            { "type", "bot_reply" }
+                }
+            );
+
+            if (!result)
+                return BadRequest("Failed to send notification");
+
+            return Ok("Notification sent successfully");
         }
     }
 }

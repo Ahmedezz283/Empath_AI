@@ -28,6 +28,7 @@ namespace Empath_AI.Model
         public string? OtpCode { get; set; }
         public DateTime? OtpExpires { get; set; }
         public bool IsVerified { get; set; } = false;
+        public string? FcmToken { get; set; }
 
         //public ICollection<Conversation> conversations { get; set; }
     }

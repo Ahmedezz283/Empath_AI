@@ -1,4 +1,5 @@
-﻿using Empath_AI.DTO;
+﻿using Empath_AI.Data;
+using Empath_AI.DTO;
 using Empath_AI.DTO.Conversation;
 using Empath_AI.Model;
 using Empath_AI.Repository;
@@ -17,14 +18,18 @@ namespace Empath_AI.Hubs
         private readonly IGeminiService _gemini;
         private readonly IMessageRepository _messageRepository;
         private readonly IHeartRateRepository _heart;
+        private readonly FcmService _fcmService;
+        private readonly AppDbContext _context;
         private static readonly Dictionary<string, string> _connections = new();
         private int _connectionsCount = 0;
 
-        public ChatHub(IGeminiService gemini, IMessageRepository messageRepository, IHeartRateRepository heartRateRepository, IMessageRepository messageService)
+        public ChatHub(IGeminiService gemini, IMessageRepository messageRepository, IHeartRateRepository heartRateRepository, IMessageRepository messageService, FcmService fcmService, AppDbContext context)
         {
             _gemini = gemini;
             _messageRepository = messageRepository;
             _heart = heartRateRepository;
+            _fcmService = fcmService;
+            _context = context;
         }
 
 
@@ -105,6 +110,22 @@ namespace Empath_AI.Hubs
                 user = userMessage,
                 bot = botMessage
             });
+
+            //firebase test
+            var user = await _context.Users.FindAsync(messageDTO.UserId);
+            if (user != null && !string.IsNullOrEmpty(user.FcmToken))
+            {
+                await _fcmService.SendNotificationAsync(
+                    user.FcmToken,
+                    "Empath AI 💬",
+                    reply.Length > 100 ? reply.Substring(0, 100) + "..." : reply,
+                    new Dictionary<string, string>
+                    {
+                        { "conversationId", messageDTO.Conversation_ID.ToString() },
+                        { "type", "bot_reply" }
+                    }
+                );
+            }
 
         }
         public async Task SendAudioBase64(MessageDTO messageDTO, string base64Audio, string mimeType)
