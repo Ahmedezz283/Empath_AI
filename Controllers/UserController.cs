@@ -175,7 +175,7 @@ namespace Empath_AI.Controllers
 
             Console.WriteLine($"Generated reset token for {model.Email}: {token}"); // For debugging
 
-            var resetLink = $"https://shahd237.github.io/reset_Password.ai/";
+            var resetLink = $"https://shahd237.github.io/empath-ai/?token={token},Ezz";
             await _emailService.SendEmailAsync(model.Email, "Reset Your Password",
     $@"
     <!DOCTYPE html>
@@ -274,7 +274,7 @@ namespace Empath_AI.Controllers
     ");
 
 
-            return Ok("Reset link sent to your email.");
+            return Ok($"Reset link sent to your email.{token}");
         }
 
         [HttpPost("reset-password")]

@@ -19,11 +19,11 @@ namespace Empath_AI.Repository
     public class ConversationRepository: IConversationRepository
     {
         private readonly AppDbContext _context;
-        private readonly ChatHub _chatHub;
-        public ConversationRepository(AppDbContext context, ChatHub chatHub)
+        //private readonly ChatHub _chatHub;
+        public ConversationRepository(AppDbContext context/*, ChatHub chatHub*/)
         {
             _context = context;
-            _chatHub = chatHub;
+            /*_chatHub = chatHub;*/
         }
 
         public async Task<IEnumerable<Conversation>> GetAll()
@@ -171,7 +171,7 @@ namespace Empath_AI.Repository
 
 
 
-        public async Task<ConversationContentDTO> OpenConversation(int conversationid ,MessageDTO message,string? content)
+        public async Task<ConversationContentDTO> OpenConversation(int conversationid /*,MessageDTO message,string? content*/)
         {
             var conversation = await _context.Conversations
                 .Include(c => c.messages)
@@ -194,7 +194,7 @@ namespace Empath_AI.Repository
                 await _context.SaveChangesAsync();
             }
 
-            await _chatHub.SendMessage(message, content);
+           // await _chatHub.SendMessage(message, content);
 
             return new ConversationContentDTO
             {
