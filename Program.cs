@@ -135,7 +135,7 @@ builder.Services.Configure<Empath_AI.Services.GeminiOptions>(builder.Configurati
 
 var app = builder.Build();
 
-app.UseCors("AllowLocalhost");
+app.UseCors("AllowAll");
 
 
 // Configure the HTTP request pipeline.
