@@ -278,11 +278,12 @@ namespace Empath_AI.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] UserResetPasswordDTO model)
         {
-            var user = await _context.Users
+            /*var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.ResetToken == model.Token && u.ResetTokenExpires > DateTime.UtcNow);
 
             if (user == null)
-                return BadRequest("Invalid or expired token.");
+                return BadRequest("Invalid or expired token.");*/
+            var user = await _user.FindUser(model.Email);
 
             if (model.Password != model.Confirm_Password)
             {
