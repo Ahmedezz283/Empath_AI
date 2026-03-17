@@ -119,6 +119,7 @@ builder.Services.AddCors(options =>
             "http://localhost:8100",
             "http://localhost:8101",
             "http://127.0.0.1:8100",
+            "http://127.0.0.1:5500",
             "https://localhost",
             "capacitor://localhost",
             "ionic://localhost",

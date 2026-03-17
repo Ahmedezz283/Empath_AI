@@ -22,7 +22,7 @@ namespace Empath_AI.Repository
         Task<List<ConversationSummaryDTO>> GetConversationSummeries(int UserID);
         Task<bool> ArchiveConversation(int conversationid);
         Task<bool> UnarchiveConversation(int conversationId);
-        Task<ConversationContentDTO> OpenConversation(int conversationid);
+        Task<ConversationContentDTO> OpenConversation(int conversationid, MessageDTO message, string? content);
         Task<IEnumerable<ConversationSummaryDTO>> ConversationHistory(int userId);
         Task<IEnumerable<ConversationContentDTO>> GetConversationHistoryWithMessages(int userId);
 

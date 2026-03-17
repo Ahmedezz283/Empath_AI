@@ -28,7 +28,6 @@ namespace Empath_AI.Repository
             return await _context.Users.ToListAsync();
         }
 
-        // Temporary storage for pending registrations
         private static readonly Dictionary<string, (UserRegisterDTO Data, string Otp, DateTime Expires)> _pendingUsers = new();
 
         /* public async Task<(bool Success, string Message, int? id)> CreateUserDetails(UserRegisterDTO user)
@@ -345,6 +344,7 @@ namespace Empath_AI.Repository
         {
             return new Random().Next(100000, 999999).ToString();
         }
+
         /*public async Task<bool> SendOtpAsync(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -447,6 +447,7 @@ namespace Empath_AI.Repository
 
             return true;
         }*/
+
         /* public async Task<(bool Success, string Message, int? id)> VerifyOtpAsync(string email, string otp)
          {
              // Check pending users

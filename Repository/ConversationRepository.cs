@@ -1,5 +1,6 @@
 ﻿using Empath_AI.Data;
 using Empath_AI.DTO.Conversation;
+using Empath_AI.Hubs;
 using Empath_AI.Migrations;
 using Empath_AI.Model;
 using FirebaseAdmin.Messaging;
@@ -18,9 +19,11 @@ namespace Empath_AI.Repository
     public class ConversationRepository: IConversationRepository
     {
         private readonly AppDbContext _context;
-        public ConversationRepository(AppDbContext context)
+        private readonly ChatHub _chatHub;
+        public ConversationRepository(AppDbContext context, ChatHub chatHub)
         {
             _context = context;
+            _chatHub = chatHub;
         }
 
         public async Task<IEnumerable<Conversation>> GetAll()
@@ -168,7 +171,7 @@ namespace Empath_AI.Repository
 
 
 
-        public async Task<ConversationContentDTO> OpenConversation(int conversationid)
+        public async Task<ConversationContentDTO> OpenConversation(int conversationid ,MessageDTO message,string? content)
         {
             var conversation = await _context.Conversations
                 .Include(c => c.messages)
@@ -190,6 +193,8 @@ namespace Empath_AI.Repository
 
                 await _context.SaveChangesAsync();
             }
+
+            await _chatHub.SendMessage(message, content);
 
             return new ConversationContentDTO
             {

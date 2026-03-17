@@ -284,7 +284,7 @@ namespace Empath_AI.Controllers
             if (user == null)
                 return BadRequest("Invalid or expired token.");
 
-            if (user.Password != user.Confirm_Password)
+            if (model.Password != model.Confirm_Password)
             {
                 return Unauthorized("Not the same Password");
             }
@@ -379,7 +379,7 @@ namespace Empath_AI.Controllers
         }
 
         [Authorize]
-        [HttpPost("change-password")]
+        [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] UserChangePasswordDTO model)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);

@@ -165,9 +165,9 @@ namespace Empath_AI.Controllers
 
 
         [HttpGet("OpenConversation/{conversationid}")]
-        public async Task<IActionResult> OpenConversation(int conversationid)
+        public async Task<IActionResult> OpenConversation(int conversationid , MessageDTO? message ,string? content)
         {
-            var c = await _conversationRepository.OpenConversation(conversationid);
+            var c = await _conversationRepository.OpenConversation(conversationid , message ,content);
             if (c == null)
                 return NotFound("conversation not found");
 
