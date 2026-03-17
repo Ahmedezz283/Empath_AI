@@ -173,7 +173,7 @@ namespace Empath_AI.Controllers
             if (!saved)
                 return NotFound("Email not found");
 
-            var resetLink = $"https://shahd237.github.io/Forget_Password/";
+            var resetLink = $"https://shahd237.github.io/Reset_Password/";
             await _emailService.SendEmailAsync(model.Email, "Reset Your Password",
     $@"
     <!DOCTYPE html>
