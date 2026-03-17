@@ -101,10 +101,20 @@ namespace Empath_AI.Controllers
             return Ok(new { message = $"{ result.Message} check your email for an OTP", result.id/*, Token = accessToken,*/});
         }
 
+        [Authorize]
         [HttpPost("upload-profile-picture")]
         public async Task<IActionResult> UploadProfilePicture([FromForm] UserProfilePictureDTO model)
         {
-            var result = await _user.AddUserProfile(model);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+
+            int userId = int.Parse(userIdClaim);
+
+            var result = await _user.AddUserProfile(userId, model);
 
             if (!result.Success)
                 return BadRequest(result.Message);
@@ -184,7 +194,7 @@ namespace Empath_AI.Controllers
                         
                         <!-- Header -->
                         <tr>
-                            <td style='background:linear-gradient(135deg,#6C63FF,#a78bfa);padding:40px;text-align:center;'>
+                            <td style='background:linear-gradient(135deg,#2c703f,#18993d);padding:40px;text-align:center;'>
                                 <h1 style='color:#ffffff;margin:0;font-size:28px;font-weight:700;letter-spacing:1px;'>Empath AI</h1>
                                 <p style='color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;'>Your emotional wellness companion</p>
                             </td>
@@ -207,7 +217,7 @@ namespace Empath_AI.Controllers
 
                                 <!-- Reset Button -->
                                 <a href='{resetLink}' 
-                                   style='display:inline-block;background:linear-gradient(135deg,#6C63FF,#a78bfa);color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 40px;border-radius:12px;margin-bottom:32px;letter-spacing:0.5px;'>
+                                   style='display:inline-block;background:linear-gradient(135deg,#2c703f,#18993d);color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 40px;border-radius:12px;margin-bottom:32px;letter-spacing:0.5px;'>
                                     Reset My Password
                                 </a>
 
@@ -407,7 +417,7 @@ namespace Empath_AI.Controllers
             return Ok("Emergency contact updated successfully");
         }
 
-        [HttpPost("send-otp")]
+       /* [HttpPost("send-otp")]
         public async Task<IActionResult> SendOtp([FromBody] string email)
         {
             var result = await _user.SendOtpAsync(email);
@@ -415,9 +425,9 @@ namespace Empath_AI.Controllers
                 return NotFound("Email not found");
 
             return Ok("OTP sent to your email");
-        }
+        }*/
 
-        [HttpPost("verify-otp")]
+        /*[HttpPost("verify-otp")]
         public async Task<IActionResult> VerifyOtp([FromBody] UserVerifyOtpDTO model)
         {
             var (success, message, id) = await _user.VerifyOtpAsync(model.Email, model.Otp);
@@ -429,7 +439,7 @@ namespace Empath_AI.Controllers
             var token = _token.CreateToken(user);
 
             return Ok(new { message, id, Token = token });
-        }
+        }*/
 
         [Authorize]
         [HttpPost("save-fcm-token")]
