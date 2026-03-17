@@ -98,7 +98,7 @@ namespace Empath_AI.Controllers
             /*var createdUser = await _user.FindUser(model.Email);
             var accessToken = _token.CreateToken(createdUser);*/
 
-            return Ok(new { message = $"{ result.Message} check your email for an OTP", result.id/*, Token = accessToken,*/});
+            return Ok(new { message = $"{ result.Message} check your email for an OTP", result.id/*, Token = accessToken,*/ });
         }
 
         [Authorize]
@@ -419,7 +419,7 @@ namespace Empath_AI.Controllers
             return Ok("Emergency contact updated successfully");
         }
 
-       /* [HttpPost("send-otp")]
+        [HttpPost("send-otp")]
         public async Task<IActionResult> SendOtp([FromBody] string email)
         {
             var result = await _user.SendOtpAsync(email);
@@ -427,21 +427,21 @@ namespace Empath_AI.Controllers
                 return NotFound("Email not found");
 
             return Ok("OTP sent to your email");
-        }*/
+        }
 
-        /*[HttpPost("verify-otp")]
+        [HttpPost("verify-otp")]
         public async Task<IActionResult> VerifyOtp([FromBody] UserVerifyOtpDTO model)
         {
             var (success, message, id) = await _user.VerifyOtpAsync(model.Email, model.Otp);
             if (!success)
                 return BadRequest(message);
 
-            
+
             var user = await _user.FindUser(model.Email);
             var token = _token.CreateToken(user);
 
             return Ok(new { message, id, Token = token });
-        }*/
+        }
 
         [Authorize]
         [HttpPost("save-fcm-token")]

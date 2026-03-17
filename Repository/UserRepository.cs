@@ -30,29 +30,29 @@ namespace Empath_AI.Repository
 
         private static readonly Dictionary<string, (UserRegisterDTO Data, string Otp, DateTime Expires)> _pendingUsers = new();
 
-        /* public async Task<(bool Success, string Message, int? id)> CreateUserDetails(UserRegisterDTO user)
-         {
-             if (user.Password != user.Confirm_Password)
-                 return (false, "Passwords do not match", null);
+        public async Task<(bool Success, string Message, int? id)> CreateUserDetails(UserRegisterDTO user)
+        {
+            if (user.Password != user.Confirm_Password)
+                return (false, "Passwords do not match", null);
 
-             // Check if email already exists in DB
-             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
-             if (existingUser != null)
-                 return (false, "Email already exists", null);
+            // Check if email already exists in DB
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+            if (existingUser != null)
+                return (false, "Email already exists", null);
 
-             // Check if already pending
-             if (_pendingUsers.ContainsKey(user.Email))
-                 _pendingUsers.Remove(user.Email);
+            // Check if already pending
+            if (_pendingUsers.ContainsKey(user.Email))
+                _pendingUsers.Remove(user.Email);
 
-             // Generate OTP
-             var otp = GenerateOtp();
+            // Generate OTP
+            var otp = GenerateOtp();
 
-             // Store temporarily — do NOT save to DB yet
-             _pendingUsers[user.Email] = (user, otp, DateTime.UtcNow.AddMinutes(10));
+            // Store temporarily — do NOT save to DB yet
+            _pendingUsers[user.Email] = (user, otp, DateTime.UtcNow.AddMinutes(10));
 
-             // ✅ Send email directly with the otp variable
-             await _emailService.SendEmailAsync(user.Email, "Your Empath AI Verification Code",
-                 $@"
+            // ✅ Send email directly with the otp variable
+            await _emailService.SendEmailAsync(user.Email, "Your Empath AI Verification Code",
+                $@"
          <!DOCTYPE html>
          <html>
          <head>
@@ -114,41 +114,41 @@ namespace Empath_AI.Repository
          </html>
          ");
 
-             return (true, "OTP sent to your email. Please verify to complete registration.", null);
-         }*/
-        public async Task<(bool Success, string Message, int? id)> CreateUserDetails(UserRegisterDTO user)
-        {
-
-            Console.WriteLine("Creating user...");
-
-            if (user.Password != user.Confirm_Password)
-            {
-                return (false, "Passwords do not match", null);
-            }
-
-            var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-            var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
-
-            var user1 = new User()
-            {
-                First_Name = user.First_Name,
-                Last_Name = user.Last_Name,
-                Email = user.Email,
-                Password = BCrypt.Net.BCrypt.HashPassword(user.Password),
-                Confirm_Password = BCrypt.Net.BCrypt.HashPassword(user.Confirm_Password),
-                Phone = user.Phone,
-                Age = user.Age,
-                Role = "User",
-                Emergancy_Contact = user.Emergancy_Contact,
-                Gender = user.Gender?.ToLower() == "male",
-                Created_At = egyptTime,
-                IsVerified = false,
-            };
-
-            await _context.Users.AddAsync(user1);
-            await _context.SaveChangesAsync();
-            return (true, "User created successfully", user1.Id);
+            return (true, "OTP sent to your email. Please verify to complete registration.", null);
         }
+        /* public async Task<(bool Success, string Message, int? id)> CreateUserDetails(UserRegisterDTO user)
+         {
+
+             Console.WriteLine("Creating user...");
+
+             if (user.Password != user.Confirm_Password)
+             {
+                 return (false, "Passwords do not match", null);
+             }
+
+             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
+
+             var user1 = new User()
+             {
+                 First_Name = user.First_Name,
+                 Last_Name = user.Last_Name,
+                 Email = user.Email,
+                 Password = BCrypt.Net.BCrypt.HashPassword(user.Password),
+                 Confirm_Password = BCrypt.Net.BCrypt.HashPassword(user.Confirm_Password),
+                 Phone = user.Phone,
+                 Age = user.Age,
+                 Role = "User",
+                 Emergancy_Contact = user.Emergancy_Contact,
+                 Gender = user.Gender?.ToLower() == "male",
+                 Created_At = egyptTime,
+                 IsVerified = false,
+             };
+
+             await _context.Users.AddAsync(user1);
+             await _context.SaveChangesAsync();
+             return (true, "User created successfully", user1.Id);
+         }*/
         public async Task<(bool Success, string Message, string? ImageUrl)> AddUserProfile(int userId ,UserProfilePictureDTO model)
         {
             var userExists = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -345,7 +345,7 @@ namespace Empath_AI.Repository
             return new Random().Next(100000, 999999).ToString();
         }
 
-        /*public async Task<bool> SendOtpAsync(string email)
+        public async Task<bool> SendOtpAsync(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
@@ -446,51 +446,51 @@ namespace Empath_AI.Repository
     ");
 
             return true;
-        }*/
+        }
 
-        /* public async Task<(bool Success, string Message, int? id)> VerifyOtpAsync(string email, string otp)
-         {
-             // Check pending users
-             if (_pendingUsers.TryGetValue(email, out var pending))
-             {
-                 if (pending.Otp != otp)
-                     return (false, "Invalid OTP", null);
+        public async Task<(bool Success, string Message, int? id)> VerifyOtpAsync(string email, string otp)
+        {
+            // Check pending users
+            if (_pendingUsers.TryGetValue(email, out var pending))
+            {
+                if (pending.Otp != otp)
+                    return (false, "Invalid OTP", null);
 
-                 if (pending.Expires < DateTime.UtcNow)
-                 {
-                     _pendingUsers.Remove(email);
-                     return (false, "OTP expired, please register again", null);
-                 }
+                if (pending.Expires < DateTime.UtcNow)
+                {
+                    _pendingUsers.Remove(email);
+                    return (false, "OTP expired, please register again", null);
+                }
 
-                 // ✅ OTP valid → create account now
-                 var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-                 var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
+                // ✅ OTP valid → create account now
+                var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+                var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
 
-                 var user = new User()
-                 {
-                     First_Name = pending.Data.First_Name,
-                     Last_Name = pending.Data.Last_Name,
-                     Email = pending.Data.Email,
-                     Password = BCrypt.Net.BCrypt.HashPassword(pending.Data.Password),
-                     Confirm_Password = BCrypt.Net.BCrypt.HashPassword(pending.Data.Confirm_Password),
-                     Phone = pending.Data.Phone,
-                     Age = pending.Data.Age,
-                     Role = "User",
-                     Emergancy_Contact = pending.Data.Emergancy_Contact,
-                     Gender = pending.Data.Gender?.ToLower() == "male",
-                     Created_At = egyptTime,
-                     IsVerified = true
-                 };
+                var user = new User()
+                {
+                    First_Name = pending.Data.First_Name,
+                    Last_Name = pending.Data.Last_Name,
+                    Email = pending.Data.Email,
+                    Password = BCrypt.Net.BCrypt.HashPassword(pending.Data.Password),
+                    Confirm_Password = BCrypt.Net.BCrypt.HashPassword(pending.Data.Confirm_Password),
+                    Phone = pending.Data.Phone,
+                    Age = pending.Data.Age,
+                    Role = "User",
+                    Emergancy_Contact = pending.Data.Emergancy_Contact,
+                    Gender = pending.Data.Gender?.ToLower() == "male",
+                    Created_At = egyptTime,
+                    IsVerified = true
+                };
 
-                 await _context.Users.AddAsync(user);
-                 await _context.SaveChangesAsync();
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
 
-                 _pendingUsers.Remove(email);
+                _pendingUsers.Remove(email);
 
-                 return (true, "Account verified and created successfully", user.Id);
-             }
+                return (true, "Account verified and created successfully", user.Id);
+            }
 
-             return (false, "No pending registration found for this email", null);
-         }*/
+            return (false, "No pending registration found for this email", null);
+        }
     }
 }
