@@ -35,22 +35,24 @@ namespace Empath_AI.Repository
             if (user.Password != user.Confirm_Password)
                 return (false, "Passwords do not match", null);
 
-            // Check if email already exists in DB
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
-            if (existingUser != null)
+            var existingUserEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+            if (existingUserEmail != null)
                 return (false, "Email already exists", null);
 
-            // Check if already pending
+            var existingUserPhone = await _context.Users.FirstOrDefaultAsync(u => u.Phone == user.Phone);
+            if (existingUserPhone != null)
+                return (false, "Phone number already exists", null);
+
+            if(user.Phone == user.Emergancy_Contact)
+                return (false, "Emergency contact cannot be the same as phone number", null);
+
             if (_pendingUsers.ContainsKey(user.Email))
                 _pendingUsers.Remove(user.Email);
 
-            // Generate OTP
             var otp = GenerateOtp();
 
-            // Store temporarily — do NOT save to DB yet
             _pendingUsers[user.Email] = (user, otp, DateTime.UtcNow.AddMinutes(10));
 
-            // ✅ Send email directly with the otp variable
             await _emailService.SendEmailAsync(user.Email, "Your Empath AI Verification Code",
                 $@"
          <!DOCTYPE html>
@@ -65,7 +67,7 @@ namespace Empath_AI.Repository
                      <td align='center'>
                          <table width='500' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);'>
                              <tr>
-                                 <td style='background:linear-gradient(135deg,#6C63FF,#a78bfa);padding:40px;text-align:center;'>
+                                 <td style='background:linear-gradient(135deg,#2c703f,#18993d);padding:40px;text-align:center;'>
                                      <h1 style='color:#ffffff;margin:0;font-size:28px;font-weight:700;letter-spacing:1px;'>Empath AI</h1>
                                      <p style='color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;'>Your emotional wellness companion</p>
                                  </td>
@@ -76,12 +78,12 @@ namespace Empath_AI.Repository
                                          <span style='font-size:28px;line-height:64px;'>🔐</span>
                                      </div>
                                      <h2 style='color:#1a1a2e;font-size:22px;margin:0 0 8px;'>Verify Your Account</h2>
-                                     <p style='color:#6b7280;font-size:15px;margin:0 0 32px;line-height:1.6;'>
+                                     <p style='color:#2c703f;font-size:15px;margin:0 0 32px;line-height:1.6;'>
                                          Enter the verification code below to complete your registration.
                                      </p>
                                      <div style='background:#f0edff;border-radius:12px;padding:24px;margin:0 0 32px;'>
-                                         <p style='color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;'>Your verification code</p>
-                                         <div style='font-size:42px;font-weight:800;letter-spacing:16px;color:#6C63FF;font-family:monospace;'>{otp}</div>
+                                         <p style='color:#2c703f;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;'>Your verification code</p>
+                                         <div style='font-size:42px;font-weight:800;letter-spacing:16px;color:#2c703f;font-family:monospace;'>{otp}</div>
                                      </div>
                                      <div style='display:inline-block;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 20px;margin-bottom:32px;'>
                                          <p style='color:#c2410c;font-size:13px;margin:0;'>
@@ -116,6 +118,7 @@ namespace Empath_AI.Repository
 
             return (true, "OTP sent to your email. Please verify to complete registration.", null);
         }
+
         /* public async Task<(bool Success, string Message, int? id)> CreateUserDetails(UserRegisterDTO user)
          {
 
@@ -149,6 +152,7 @@ namespace Empath_AI.Repository
              await _context.SaveChangesAsync();
              return (true, "User created successfully", user1.Id);
          }*/
+
         public async Task<(bool Success, string Message, string? ImageUrl)> AddUserProfile(int userId ,UserProfilePictureDTO model)
         {
             var userExists = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -173,7 +177,7 @@ namespace Empath_AI.Repository
                 await model.Image.CopyToAsync(stream);
             }
 
-            userExists.Image_URL = $"/uploads/{fileName}";
+            userExists.Image_URL = $"https://empath-ai.runasp.net/uploads/{fileName}";
             _context.Users.Update(userExists);
             await _context.SaveChangesAsync();
 
@@ -185,10 +189,12 @@ namespace Empath_AI.Repository
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
         }
+
         public async Task<User?> FindUser(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
         }
+
         public async Task<bool> UpdateUser(UserRegisterDTO usernm, int Id)
         {
             var user = await FindUser(Id);
@@ -241,11 +247,13 @@ namespace Empath_AI.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+
         public async Task Delete(User user)
         {
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
         }
+
         public async Task<bool> GeneratePasswordResetTokenAsync(string email, string token)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -259,6 +267,7 @@ namespace Empath_AI.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+
         /*        public async Task<(User user, string refreshToken)> SocialLoginAsync(UserSocialLoginDTO model)
                 {
                     var user = await _context.Users
@@ -304,17 +313,16 @@ namespace Empath_AI.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+
         public async Task<(User user, string refreshToken)> SocialLoginAsync(UserSocialLoginDTO model)
         {
-            // 1️⃣ Validate token and get full user info
+
             var validatedUser = await _socialAuthService.ValidateSocialTokenAsync(model.Provider, model.Token);
 
-            // 2️⃣ Check if user exists
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == validatedUser.Email);
 
             if (user == null)
             {
-                // 3️⃣ Create new user with safe defaults for non-nullable fields
                 user = new User
                 {
                     Email = validatedUser.Email,
@@ -325,21 +333,22 @@ namespace Empath_AI.Repository
                     Password = null,
                     Role = "User",
                     Created_At = DateTimeOffset.UtcNow,
-                    Phone = "",                 // safe default for non-nullable
-                    Emergancy_Contact = ""      // safe default
+                    Phone = "",
+                    Emergancy_Contact = "" ,
+                    
                 };
 
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
             }
 
-            // 4️⃣ Generate refresh token and save
             var refreshToken = _token.GenerateRefreshToken();
             user.RefreshToken = refreshToken;
             await _context.SaveChangesAsync();
 
             return (user, refreshToken);
         }
+
         public string GenerateOtp()
         {
             return new Random().Next(100000, 999999).ToString();
@@ -357,100 +366,73 @@ namespace Empath_AI.Repository
             await _context.SaveChangesAsync();
 
             await _emailService.SendEmailAsync(email, "Your Empath AI Verification Code",
-     $@"
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset='UTF-8'>
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    </head>
-    <body style='margin:0;padding:0;background-color:#f4f6fb;font-family:Arial,sans-serif;'>
-        
-        <!-- Wrapper -->
-        <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f4f6fb;padding:40px 0;'>
-            <tr>
-                <td align='center'>
-                    
-                    <!-- Card -->
-                    <table width='500' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);'>
-                        
-                        <!-- Header -->
-                        <tr>
-                            <td style='background:linear-gradient(135deg,#2c703f,#18993d);padding:40px;text-align:center;'>
-                                <h1 style='color:#ffffff;margin:0;font-size:28px;font-weight:700;letter-spacing:1px;'>Empath AI</h1>
-                                <p style='color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;'>Your emotional wellness companion</p>
-                            </td>
-                        </tr>
-
-                        <!-- Body -->
-                        <tr>
-                            <td style='padding:40px;text-align:center;'>
-                                
-                                <!-- Icon -->
-                                <div style='width:64px;height:64px;background:#f0edff;border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;'>
-                                    <span style='font-size:28px;'>🔐</span>
-                                </div>
-
-                                <h2 style='color:#1a1a2e;font-size:22px;margin:0 0 8px;'>Verify Your Account</h2>
-                                <p style='color:#6b7280;font-size:15px;margin:0 0 32px;line-height:1.6;'>
-                                    Enter the verification code below to complete your registration.
-                                </p>
-
-                                <!-- OTP Box -->
-                                <div style='background:#f0edff;border-radius:12px;padding:24px;margin:0 0 32px;'>
-                                    <p style='color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;'>Your verification code</p>
-                                    <div style='font-size:42px;font-weight:800;letter-spacing:16px;color:#6C63FF;font-family:monospace;'>{otp}</div>
-                                </div>
-
-                                <!-- Timer -->
-                                <div style='display:inline-block;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 20px;margin-bottom:32px;'>
-                                    <p style='color:#c2410c;font-size:13px;margin:0;'>
-                                        ⏱️ This code expires in <strong>10 minutes</strong>
-                                    </p>
-                                </div>
-
-                                <p style='color:#9ca3af;font-size:13px;margin:0;line-height:1.6;'>
-                                    If you didn't create an account with Empath AI,<br>you can safely ignore this email.
-                                </p>
-
-                            </td>
-                        </tr>
-
-                        <!-- Divider -->
-                        <tr>
-                            <td style='padding:0 40px;'>
-                                <hr style='border:none;border-top:1px solid #f3f4f6;margin:0;'>
-                            </td>
-                        </tr>
-
-                        <!-- Footer -->
-                        <tr>
-                            <td style='padding:24px 40px;text-align:center;'>
-                                <p style='color:#9ca3af;font-size:12px;margin:0;line-height:1.8;'>
-                                    © 2026 Empath AI · Your emotional wellness companion<br>
-                                    This is an automated message, please do not reply.
-                                </p>
-                            </td>
-                        </tr>
-
-                    </table>
-                    <!-- End Card -->
-
-                </td>
-            </tr>
-        </table>
-        <!-- End Wrapper -->
-
-    </body>
-    </html>
-    ");
+               $@"
+         <!DOCTYPE html>
+         <html>
+         <head>
+             <meta charset='UTF-8'>
+             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+         </head>
+         <body style='margin:0;padding:0;background-color:#f4f6fb;font-family:Arial,sans-serif;'>
+             <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f4f6fb;padding:40px 0;'>
+                 <tr>
+                     <td align='center'>
+                         <table width='500' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);'>
+                             <tr>
+                                 <td style='background:linear-gradient(135deg,#2c703f,#18993d);padding:40px;text-align:center;'>
+                                     <h1 style='color:#ffffff;margin:0;font-size:28px;font-weight:700;letter-spacing:1px;'>Empath AI</h1>
+                                     <p style='color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;'>Your emotional wellness companion</p>
+                                 </td>
+                             </tr>
+                             <tr>
+                                 <td style='padding:40px;text-align:center;'>
+                                     <div style='width:64px;height:64px;background:#f0edff;border-radius:50%;margin:0 auto 24px;'>
+                                         <span style='font-size:28px;line-height:64px;'>🔐</span>
+                                     </div>
+                                     <h2 style='color:#1a1a2e;font-size:22px;margin:0 0 8px;'>Verify Your Account</h2>
+                                     <p style='color:#2c703f;font-size:15px;margin:0 0 32px;line-height:1.6;'>
+                                         Enter the verification code below to complete your registration.
+                                     </p>
+                                     <div style='background:#f0edff;border-radius:12px;padding:24px;margin:0 0 32px;'>
+                                         <p style='color:#2c703f;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;'>Your verification code</p>
+                                         <div style='font-size:42px;font-weight:800;letter-spacing:16px;color:#2c703f;font-family:monospace;'>{otp}</div>
+                                     </div>
+                                     <div style='display:inline-block;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 20px;margin-bottom:32px;'>
+                                         <p style='color:#c2410c;font-size:13px;margin:0;'>
+                                             ⏱️ This code expires in <strong>10 minutes</strong>
+                                         </p>
+                                     </div>
+                                     <p style='color:#9ca3af;font-size:13px;margin:0;line-height:1.6;'>
+                                         If you didn't create an account with Empath AI,<br>you can safely ignore this email.
+                                     </p>
+                                 </td>
+                             </tr>
+                             <tr>
+                                 <td style='padding:0 40px;'>
+                                     <hr style='border:none;border-top:1px solid #f3f4f6;margin:0;'>
+                                 </td>
+                             </tr>
+                             <tr>
+                                 <td style='padding:24px 40px;text-align:center;'>
+                                     <p style='color:#9ca3af;font-size:12px;margin:0;line-height:1.8;'>
+                                         © 2026 Empath AI · Your emotional wellness companion<br>
+                                         This is an automated message, please do not reply.
+                                     </p>
+                                 </td>
+                             </tr>
+                         </table>
+                     </td>
+                 </tr>
+             </table>
+         </body>
+         </html>
+         ");
 
             return true;
         }
 
         public async Task<(bool Success, string Message, int? id)> VerifyOtpAsync(string email, string otp)
         {
-            // Check pending users
             if (_pendingUsers.TryGetValue(email, out var pending))
             {
                 if (pending.Otp != otp)
@@ -462,7 +444,6 @@ namespace Empath_AI.Repository
                     return (false, "OTP expired, please register again", null);
                 }
 
-                // ✅ OTP valid → create account now
                 var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
                 var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
 

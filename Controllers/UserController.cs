@@ -46,13 +46,30 @@ namespace Empath_AI.Controllers
             return Ok(users);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(int id)
+        [HttpGet("get-user")]
+        public async Task<IActionResult> GetUserById()
         {
-            var user = await _user.FindUser(id);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+            var authUserId = int.Parse(userIdClaim);
+
+            var user = await _user.FindUser(authUserId);
             if (user == null)
                 return NotFound("User not found");
-            return Ok(user);
+
+            var result = new UserRegisterDTO
+            {
+                First_Name = user.First_Name,
+                Last_Name = user.Last_Name,
+                Email = user.Email,
+                Phone = user.Phone,
+                Age = user.Age,
+                Gender = (bool)user.Gender ? "Male" : "Female",
+                Image_URl = user.Image_URL
+            };
+
+            return Ok(result);
         }
 
         [HttpPost("Login")]
@@ -141,7 +158,6 @@ namespace Empath_AI.Controllers
             return Ok("User updated successfully");
         }
 
-
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] UserTokenRequestDTO request)
         {
@@ -175,7 +191,7 @@ namespace Empath_AI.Controllers
 
             Console.WriteLine($"Generated reset token for {model.Email}: {token}"); // For debugging
 
-            var resetLink = $"https://shahd237.github.io/empath-ai/?token={token},Ezz";
+            var resetLink = $"https://shahd237.github.io/empath-ai/?token={token}";
             await _emailService.SendEmailAsync(model.Email, "Reset Your Password",
     $@"
     <!DOCTYPE html>
