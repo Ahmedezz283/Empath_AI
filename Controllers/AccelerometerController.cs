@@ -3,6 +3,7 @@ using Empath_AI.DTO.Accelerometer;
 using Empath_AI.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Empath_AI.Controllers
 {
@@ -24,9 +25,14 @@ namespace Empath_AI.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> Add([FromBody] AccelerometerDTO dto)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+            var authUserId = int.Parse(userIdClaim);
+
             if (dto == null) return BadRequest("Invalid data.");
 
-            await _accelerometerRepository.AddAsync(dto);
+            await _accelerometerRepository.AddAsync(dto , authUserId);
 
             return Ok("Sensor data recorded successfully.");
         }

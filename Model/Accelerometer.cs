@@ -12,7 +12,7 @@
 
         // Activity
         public int StepCount { get; set; }
-        public string ActivityLevel { get; set; } // "sitting", "walking", "running"
+        public string ActivityLevel { get; set; } 
 
         // Fall detection
         public bool FallDetected { get; set; }

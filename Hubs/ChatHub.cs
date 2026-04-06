@@ -7,6 +7,7 @@ using Empath_AI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 
@@ -20,16 +21,18 @@ namespace Empath_AI.Hubs
         private readonly IHeartRateRepository _heart;
         private readonly FcmService _fcmService;
         private readonly AppDbContext _context;
+        private readonly AI_ModelService _emotionService;
         private static readonly Dictionary<string, string> _connections = new();
         private int _connectionsCount = 0;
 
-        public ChatHub(IGeminiService gemini, IMessageRepository messageRepository, IHeartRateRepository heartRateRepository, IMessageRepository messageService, FcmService fcmService, AppDbContext context)
+        public ChatHub(IGeminiService gemini, IMessageRepository messageRepository, IHeartRateRepository heartRateRepository, IMessageRepository messageService, FcmService fcmService, AppDbContext context, AI_ModelService emotionService)
         {
             _gemini = gemini;
             _messageRepository = messageRepository;
             _heart = heartRateRepository;
             _fcmService = fcmService;
             _context = context;
+            _emotionService = emotionService;
         }
 
 
@@ -58,7 +61,7 @@ namespace Empath_AI.Hubs
          }
  */
 
-        public async Task SendMessage(MessageDTO messageDTO, string content)
+        /*public async Task SendMessage(MessageDTO messageDTO, string content)
         {
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -76,14 +79,14 @@ namespace Empath_AI.Hubs
 
             // 2️⃣ Prepare the AI system prompt
             var systemPrompt = @"
-             You are EmpathAI — an emotional wellness companion.
-             You must always:
-             - be empathetic and supportive
-             - detect emotional tone
-             - suggest grounding / safe mental self-help strategies
-             - never give medical, legal, or harmful advice
-             - if user is in crisis → encourage contacting real professionals
-             ";
+                     You are EmpathAI — an emotional wellness companion.
+                     You must always:
+                     - be empathetic and supportive
+                     - detect emotional tone
+                     - suggest grounding / safe mental self-help strategies
+                     - never give medical, legal, or harmful advice
+                     - if user is in crisis → encourage contacting real professionals
+                     ";
 
             // 3️⃣ Call Gemini to generate AI reply
             var (success, reply, error) = await _gemini.GenerateTextAsync(systemPrompt, content);
@@ -121,12 +124,121 @@ namespace Empath_AI.Hubs
                     reply.Length > 100 ? reply.Substring(0, 100) + "..." : reply,
                     new Dictionary<string, string>
                     {
-                        { "conversationId", messageDTO.Conversation_ID.ToString() },
-                        { "type", "bot_reply" }
+                                { "conversationId", messageDTO.Conversation_ID.ToString() },
+                                { "type", "bot_reply" }
                     }
                 );
             }
 
+        }
+*/
+
+
+        public async Task SendMessage(MessageDTO messageDTO, string content)
+        {
+            try
+            {
+                Console.WriteLine(">>> SendMessage called");
+
+                var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                Console.WriteLine($">>> userId: {userId}");
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    await Clients.Caller.SendAsync("ReceiveError", "Unauthorized: Invalid or missing token.");
+                    return;
+                }
+
+                messageDTO.UserId = int.Parse(userId);
+                Console.WriteLine($">>> Saving user message...");
+
+                var userMessage = await _messageRepository.SaveUserMessageAsync(messageDTO, content);
+                Console.WriteLine($">>> User message saved");
+
+                Console.WriteLine($">>> Getting emotion...");
+                var emotion = await _emotionService.GetEmotionAsync(messageDTO.UserId);
+                Console.WriteLine($">>> Emotion: {emotion}");
+
+                var latestAccel = await _context.Accelerometer
+                      .Where(a => a.UserId == messageDTO.UserId)
+                      .OrderByDescending(a => a.Timestamp)
+                      .FirstOrDefaultAsync();
+
+                if (latestAccel != null)
+                    Console.WriteLine($"[Accelerometer] State: {latestAccel.ActivityLevel} | Steps: {latestAccel.StepCount} | Fall: {latestAccel.FallDetected}");
+                else
+                    Console.WriteLine("[Accelerometer] No data found for this user");
+
+                // ✅ Build sensor context string
+                var sensorContext = "";
+
+                if (latestAccel != null)
+                {
+                    sensorContext += $@"
+                     - Behavioral State: {latestAccel.ActivityLevel}
+                     - Step Count: {latestAccel.StepCount}
+                     - Fall Detected: {(latestAccel.FallDetected ? "YES - user may have fallen" : "No")}";
+                }
+
+                // ✅ Build Gemini system prompt with emotion + accelerometer only
+                var systemPrompt = $@"You are EmpathAI — an emotional wellness companion.
+
+                Current biosensor data for this user:
+                - Detected Emotion (AI model): {emotion.ToUpper()}
+                {sensorContext}
+                
+                Based on this data, you must:
+                - Acknowledge and respond to their {emotion} emotional state
+                - Consider their physical activity and behavioral state in your response
+                - Be empathetic and supportive
+                - Suggest grounding / safe mental self-help strategies relevant to their current state when is asked or when needed
+                - Never give pharmaceutical, legal, or harmful advice
+                - If user is in crisis → encourage contacting real professionals
+                - dont make answers too long or too short keep its length appropriate according to the context of the conversation";
+
+                Console.WriteLine($">>> Calling Gemini...");
+                var (success, reply, error) = await _gemini.GenerateTextAsync(systemPrompt, content);
+                Console.WriteLine($">>> Gemini success: {success}");
+
+                if (!success)
+                {
+                    await Clients.Caller.SendAsync("ReceiveError", $"[Gemini Error] {error}");
+                    return;
+                }
+
+                Console.WriteLine($">>> Saving bot message...");
+                var botMessage = await _messageRepository.SaveBotMessageAsync(messageDTO, reply);
+                Console.WriteLine($">>> Bot message saved");
+
+                await Clients.Caller.SendAsync("ReceiveMessage", new
+                {
+                    user = userMessage,
+                    bot = botMessage,
+                    emotion = emotion
+                });
+                Console.WriteLine($">>> ReceiveMessage sent");
+
+                var user = await _context.Users.FindAsync(messageDTO.UserId);
+                if (user != null && !string.IsNullOrEmpty(user.FcmToken))
+                {
+                    await _fcmService.SendNotificationAsync(
+                        user.FcmToken,
+                        "Empath AI 💬",
+                        reply.Length > 100 ? reply.Substring(0, 100) + "..." : reply,
+                        new Dictionary<string, string>
+                        {
+                    { "conversationId", messageDTO.Conversation_ID.ToString() },
+                    { "type", "bot_reply" },
+                    { "emotion", emotion }
+                        }
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"🔥 SendMessage error: {ex}");
+                await Clients.Caller.SendAsync("ReceiveError", $"Server error: {ex.Message}");
+            }
         }
         public async Task SendAudioBase64(MessageDTO messageDTO, string base64Audio, string mimeType)
         {

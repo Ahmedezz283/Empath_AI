@@ -65,6 +65,7 @@ builder.Services.AddHttpClient<SocialAuthService>();
 builder.Services.AddScoped<Email>();
 builder.Services.AddScoped<Token>();
 builder.Services.AddSingleton<FcmService>();
+builder.Services.AddHttpClient<AI_ModelService>();
 //builder.Services.AddScoped<Bot>();
 builder.Services.AddSignalR(options =>
 {
@@ -110,7 +111,7 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
 //builder.Services.AddHostedService<DeleteOldConversationsService>();
 //////////////////////////////////////////////////////////////////////////////
 
-builder.Services.AddCors(options =>
+/*builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
@@ -131,7 +132,17 @@ builder.Services.AddCors(options =>
         .AllowCredentials();
     });
 });
-
+*/
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => true) // ✅ allows null origin from file://
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // ✅ required for SignalR
+    });
+});
 builder.Services.Configure<Empath_AI.Services.GeminiOptions>(builder.Configuration.GetSection("Gemini"));
 
 var app = builder.Build();

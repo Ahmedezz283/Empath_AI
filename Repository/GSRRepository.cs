@@ -14,7 +14,7 @@ namespace Empath_AI.Repository
             _context = context;
         }
 
-        public async Task AddAsync(GSRRecordDTO dto)
+        public async Task AddAsync(GSRRecordDTO data, int userid)
         {
             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
@@ -28,29 +28,35 @@ namespace Empath_AI.Repository
             var existingHeartRate = await _context.Hearts
                      .FirstOrDefaultAsync(h => h.UserId == device.UserId);*/
 
-            /*if (existingHeartRate != null)
+            var existingGSRrecourd = await _context.GSRRecords
+                    .FirstOrDefaultAsync(h => h.UserId == userid);
+
+            if (existingGSRrecourd != null)
             {
-                existingHeartRate.HeartRateValue = model.HeartRateValue;
-                existingHeartRate.Timestamp = egyptTime;
-                _context.Hearts.Update(existingHeartRate);
+                existingGSRrecourd.StressLevel = data.StressLevel;
+                existingGSRrecourd.RawGSRValue = data.RawGSRValue;
+                existingGSRrecourd.SkinConductance = data.SkinConductance;
+                existingGSRrecourd.StressScore = data.StressScore;
+                existingGSRrecourd.Timestamp = egyptTime;
+                _context.GSRRecords.Update(existingGSRrecourd);
             }
-            else*/
-            //{
-
-            var record = new GSRRecord
+            else
             {
-                /* DeviceId = device.Id,
-                    UserId = device.UserId,*/
-                RawGSRValue = dto.RawGSRValue,
-                SkinConductance = dto.SkinConductance,
-                StressLevel = dto.StressLevel ?? "low",
-                StressScore = dto.StressScore,
-                Timestamp = egyptTime
-            };
 
-            //  }
+                var record = new GSRRecord
+                {
+                    /* DeviceId = device.Id,*/
+                    UserId = userid,
+                    RawGSRValue = data.RawGSRValue,
+                    SkinConductance = data.SkinConductance,
+                    StressLevel = data.StressLevel ?? "low",
+                    StressScore = data.StressScore,
+                    Timestamp = egyptTime
+                };
 
-            await _context.GSRRecords.AddAsync(record);
+              await _context.GSRRecords.AddAsync(record);
+            }
+
             await _context.SaveChangesAsync();
         }
 

@@ -5,7 +5,7 @@ namespace Empath_AI.Repository
 {
     public interface IAccelerometerRepository
     {
-        Task<(bool Success, string Message)> AddAsync(AccelerometerDTO data);
+        Task<(bool Success, string Message)> AddAsync(AccelerometerDTO data, int userid);
         Task<IEnumerable<Accelerometer>> GetByUserIdAsync(int userId);
         Task<IEnumerable<Accelerometer>> GetFallsByUserIdAsync(int userId);
     }

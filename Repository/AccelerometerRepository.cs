@@ -14,7 +14,7 @@ namespace Empath_AI.Repository
             _context = context;
         }
 
-        public async Task<(bool Success, string Message)> AddAsync(AccelerometerDTO data)
+        public async Task<(bool Success, string Message)> AddAsync(AccelerometerDTO data , int userid)
         {
             var egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
             var egyptTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, egyptTimeZone);
@@ -23,36 +23,41 @@ namespace Empath_AI.Repository
                 .FirstOrDefaultAsync(d => d.DeviceToken == deviceToken && d.IsActive);
 
             if (device == null)
-                return (false, "Unauthorized device");
+                return (false, "Unauthorized device");*/
 
-            var existingHeartRate = await _context.Hearts
-                     .FirstOrDefaultAsync(h => h.UserId == device.UserId);*/
 
-            /*if (existingHeartRate != null)
+
+            var existingAcceelerometer = await _context.Accelerometer
+                     .FirstOrDefaultAsync(h => h.UserId == userid);
+
+            if (existingAcceelerometer != null)
             {
-                existingHeartRate.HeartRateValue = model.HeartRateValue;
-                existingHeartRate.Timestamp = egyptTime;
-                _context.Hearts.Update(existingHeartRate);
+                existingAcceelerometer.AccelX = data.AccelX;
+                existingAcceelerometer.AccelY = data.AccelY;
+                existingAcceelerometer.AccelZ = data.AccelZ;
+                existingAcceelerometer.ActivityLevel = data.ActivityLevel;
+                existingAcceelerometer.Timestamp = egyptTime;
+                _context.Accelerometer.Update(existingAcceelerometer);
             }
-            else*/
-            //{
-            var accelerometer = new Accelerometer
+            else
             {
-                /* DeviceId = device.Id,
-                 UserId = device.UserId,*/
-                AccelX = data.AccelX,
-                AccelY = data.AccelY,
-                AccelZ = data.AccelZ,
-                StepCount = data.StepCount,
-                ActivityLevel = data.ActivityLevel,
-                FallDetected = data.FallDetected,
-                Timestamp = egyptTime
-            };
-            //  }
-            await _context.Accelerometer.AddAsync(accelerometer);
+                var accelerometer = new Accelerometer
+                {
+                    /*DeviceId = device.Id,*/
+                    UserId = userid,
+                    AccelX = data.AccelX,
+                    AccelY = data.AccelY,
+                    AccelZ = data.AccelZ,
+                    StepCount = data.StepCount,
+                    ActivityLevel = data.ActivityLevel,
+                    FallDetected = data.FallDetected,
+                    Timestamp = egyptTime
+                };
+                await _context.Accelerometer.AddAsync(accelerometer);
+            }
 
-            // device.Last_Active = egyptTime;
-            //_context.Devices.Update(device);
+           /* device.Last_Active = egyptTime;
+            _context.Devices.Update(device);*/
             await _context.SaveChangesAsync();
 
             return (true, "Heart rate recorded successfully");

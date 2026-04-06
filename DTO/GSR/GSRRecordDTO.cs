@@ -15,5 +15,6 @@ namespace Empath_AI.DTO.GSR
 
         [JsonPropertyName("stressScore")]
         public int StressScore { get; set; }
+        public int userid { get; set; }
     }
 }
