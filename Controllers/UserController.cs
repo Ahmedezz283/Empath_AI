@@ -98,6 +98,22 @@ namespace Empath_AI.Controllers
             });
         }
 
+        [HttpGet("Check-for-Medical-Report")]
+        public async Task<IActionResult> CheckForMedicalReport()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token");
+            var authUserId = int.Parse(userIdClaim);
+
+
+            var report = await _context.Medical_Reports.FirstOrDefaultAsync(r => r.UserId == authUserId);
+            if (report == null)
+                return NotFound(false);
+
+            return Ok(true);
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateUser([FromBody] UserRegisterDTO model)
         {
