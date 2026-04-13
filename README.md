@@ -1,4 +1,4 @@
-# Empath-AI
+# Empath_AI
 
 A comprehensive real-time communication platform powered by AI, built with ASP.NET Core and Gemini API integration. Empath-AI enables emotional intelligence conversations with real-time messaging capabilities, device tracking, and heart rate monitoring.
 
